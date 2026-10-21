@@ -14,13 +14,15 @@ function text(value) {
   return value == null ? "" : String(value);
 }
 
-// Artwork filenames may be entered as "painting.jpg" or "images/painting.jpg".
-// Bare filenames are resolved relative to the repository's images/ folder.
 function resolveImagePath(path) {
   const value = text(path).trim();
   if (!value) return "";
   if (/^(https?:|data:|\/)/i.test(value) || value.includes("/")) return value;
   return "images/" + value;
+}
+
+function safeExternalLink(url) {
+  return /^https?:\/\//i.test(url || "");
 }
 
 async function renderInstagramLinks() {
@@ -35,8 +37,41 @@ async function renderInstagramLinks() {
   }
 }
 
-function safeExternalLink(url) {
-  return /^https?:\/\//i.test(url || "");
+function openArtworkDialog(work) {
+  const dialog = document.querySelector("#artwork-dialog");
+  const content = document.querySelector("#dialog-content");
+  if (!dialog || !content) return;
+
+  content.innerHTML = "";
+  const imageWrap = document.createElement("div");
+  imageWrap.className = "dialog-image-wrap";
+  const img = document.createElement("img");
+  img.src = resolveImagePath(work.image);
+  img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
+  imageWrap.appendChild(img);
+  content.appendChild(imageWrap);
+
+  const details = document.createElement("div");
+  details.className = "dialog-details";
+  const title = document.createElement("h2");
+  title.textContent = [text(work.title), text(work.year)].filter(Boolean).join(", ");
+  details.appendChild(title);
+
+  const metadata = [work.medium, work.dimensions].filter(Boolean).map(text).join(" · ");
+  if (metadata) {
+    const p = document.createElement("p");
+    p.className = "dialog-metadata";
+    p.textContent = metadata;
+    details.appendChild(p);
+  }
+  if (work.description) {
+    const p = document.createElement("p");
+    p.className = "dialog-description";
+    p.textContent = work.description;
+    details.appendChild(p);
+  }
+  content.appendChild(details);
+  dialog.showModal();
 }
 
 async function renderHome() {
@@ -52,56 +87,40 @@ async function renderHome() {
       container.innerHTML = '<p class="empty-state">Choose a homepage painting in <code>data/site-config.json</code> and add its image path to <code>data/artworks.json</code>.</p>';
       return;
     }
+
     container.innerHTML = "";
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "hero-open";
+    button.setAttribute("aria-label", "View details for " + text(featured.title || "featured painting"));
     const img = document.createElement("img");
     img.src = resolveImagePath(featured.image);
     img.alt = text(featured.alt || featured.title || "Painting by Nancy Nguyen");
     img.fetchPriority = "high";
-    container.appendChild(img);
+    button.appendChild(img);
+    button.addEventListener("click", () => openArtworkDialog(featured));
+    container.appendChild(button);
   } catch (error) {
     container.innerHTML = '<p class="empty-state">Artwork data could not be loaded. Preview the site through a local server, not by opening the HTML file directly.</p>';
   }
-}
-
-function openArtworkDialog(work) {
-  const dialog = document.querySelector("#artwork-dialog");
-  const content = document.querySelector("#dialog-content");
-  if (!dialog || !content) return;
-  content.innerHTML = "";
-  const imageWrap = document.createElement("div");
-  imageWrap.className = "dialog-image-wrap";
-  const img = document.createElement("img");
-  img.src = resolveImagePath(work.image);
-  img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
-  imageWrap.appendChild(img);
-  content.appendChild(imageWrap);
-  const details = document.createElement("div");
-  details.className = "dialog-details";
-  const title = document.createElement("p");
-  title.textContent = [text(work.title), text(work.year)].filter(Boolean).join(", ");
-  details.appendChild(title);
-  const metadata = [work.medium, work.dimensions].filter(Boolean).map(text).join(" · ");
-  if (metadata) {
-    const p = document.createElement("p");
-    p.textContent = metadata;
-    details.appendChild(p);
-  }
-  if (work.description) {
-    const p = document.createElement("p");
-    p.textContent = work.description;
-    details.appendChild(p);
-  }
-  content.appendChild(details);
-  dialog.showModal();
 }
 
 async function renderWorks() {
   const grid = document.querySelector("#works-grid");
   if (!grid) return;
   try {
-    const artworks = await readJson(DATA.artworks);
-    const works = artworks.filter(work => work.image);
+    const [artworks, config] = await Promise.all([
+      readJson(DATA.artworks),
+      readJson(DATA.config)
+    ]);
+    let works = artworks.filter(work => work.image);
+    if (Array.isArray(config.curatedArtworkIds) && config.curatedArtworkIds.length) {
+      const order = new Map(config.curatedArtworkIds.map((id, index) => [id, index]));
+      works = works.filter(work => order.has(work.id))
+        .sort((a, b) => order.get(a.id) - order.get(b.id));
+    }
     if (!works.length) return;
+
     grid.innerHTML = "";
     works.forEach(work => {
       const button = document.createElement("button");
@@ -113,17 +132,6 @@ async function renderWorks() {
       img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
       img.loading = "lazy";
       button.appendChild(img);
-      const title = document.createElement("span");
-      title.className = "work-title";
-      title.textContent = [text(work.title), text(work.year)].filter(Boolean).join(", ");
-      button.appendChild(title);
-      const meta = [work.medium, work.dimensions].filter(Boolean).map(text).join(" · ");
-      if (meta) {
-        const metadata = document.createElement("span");
-        metadata.className = "work-meta";
-        metadata.textContent = meta;
-        button.appendChild(metadata);
-      }
       button.addEventListener("click", () => openArtworkDialog(work));
       grid.appendChild(button);
     });
@@ -145,6 +153,7 @@ function renderExhibitionList(containerId, exhibitions) {
       year.className = "exhibition-year";
       year.textContent = text(exhibition.year);
       li.appendChild(year);
+
       const detail = document.createElement("span");
       if (exhibition.url && safeExternalLink(exhibition.url)) {
         const link = document.createElement("a");
@@ -156,11 +165,12 @@ function renderExhibitionList(containerId, exhibitions) {
       } else {
         detail.appendChild(document.createTextNode(text(exhibition.title)));
       }
-      if (exhibition.venue || exhibition.location) {
+      const venue = [exhibition.venue, exhibition.location].filter(Boolean).join(", ");
+      if (venue) {
         detail.appendChild(document.createTextNode(", "));
         const location = document.createElement("span");
         location.className = "exhibition-location";
-        location.textContent = [exhibition.venue, exhibition.location].filter(Boolean).join(", ");
+        location.textContent = venue;
         detail.appendChild(location);
       }
       li.appendChild(detail);
@@ -175,9 +185,47 @@ async function renderExhibitions() {
     renderExhibitionList("solo-exhibitions", exhibitions.filter(item => item.type === "solo"));
     renderExhibitionList("group-exhibitions", exhibitions.filter(item => item.type === "group"));
   } catch (error) {
-    const main = document.querySelector(".cv-page");
-    if (main) main.insertAdjacentHTML("afterbegin", '<p class="empty-state">Exhibition data could not be loaded. Preview the site through a local server.</p>');
+    const section = document.querySelector("#exhibitions");
+    if (section) section.insertAdjacentHTML("afterbegin", '<p class="empty-state">Exhibition data could not be loaded. Preview the site through a local server.</p>');
   }
+}
+
+function setupMenu() {
+  const toggle = document.querySelector(".menu-toggle");
+  const menu = document.querySelector("#site-menu");
+  if (!toggle || !menu) return;
+
+  toggle.addEventListener("click", () => {
+    const isOpen = toggle.getAttribute("aria-expanded") === "true";
+    toggle.setAttribute("aria-expanded", String(!isOpen));
+    toggle.textContent = isOpen ? "Menu" : "Close";
+    menu.hidden = isOpen;
+  });
+  menu.querySelectorAll("a[href^='#']").forEach(link => {
+    link.addEventListener("click", () => {
+      toggle.setAttribute("aria-expanded", "false");
+      toggle.textContent = "Menu";
+      menu.hidden = true;
+    });
+  });
+}
+
+function setupDialog() {
+  const dialog = document.querySelector("#artwork-dialog");
+  const close = document.querySelector(".dialog-close");
+  if (!dialog || !close) return;
+  close.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", event => {
+    if (event.target === dialog) dialog.close();
+  });
+}
+
+function setupHeader() {
+  const header = document.querySelector(".site-header");
+  if (!header) return;
+  const update = () => header.classList.toggle("is-scrolled", window.scrollY > 24);
+  update();
+  window.addEventListener("scroll", update, { passive: true });
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -185,10 +233,7 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHome();
   renderWorks();
   renderExhibitions();
-  const dialog = document.querySelector("#artwork-dialog");
-  const close = document.querySelector(".dialog-close");
-  if (close && dialog) close.addEventListener("click", () => dialog.close());
-  if (dialog) dialog.addEventListener("click", event => {
-    if (event.target === dialog) dialog.close();
-  });
+  setupMenu();
+  setupDialog();
+  setupHeader();
 });
