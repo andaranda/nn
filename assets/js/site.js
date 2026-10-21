@@ -64,12 +64,6 @@ function openArtworkDialog(work) {
     p.textContent = metadata;
     details.appendChild(p);
   }
-  if (work.description) {
-    const p = document.createElement("p");
-    p.className = "dialog-description";
-    p.textContent = work.description;
-    details.appendChild(p);
-  }
   content.appendChild(details);
   dialog.showModal();
 }
