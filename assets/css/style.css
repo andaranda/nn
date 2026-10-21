@@ -8,7 +8,7 @@
   --mantra-opacity: 0;
 }
 * { box-sizing: border-box; }
-html { background: #fff; scroll-behavior: smooth; scroll-padding-top: 0; scroll-snap-type: y mandatory; }
+html { background: #fff; scroll-behavior: smooth; scroll-padding-top: 68px; scroll-snap-type: y mandatory; }
 body {
   margin: 0;
   background: #fff;
@@ -322,7 +322,9 @@ button { color: inherit; font: inherit; }
 }
 @media (max-width: 600px) {
   :root { --page-margin: 14px; }
+  html { scroll-padding-top: 60px; }
   .site-header { min-height: 60px; padding-top: 14px; padding-bottom: 14px; }
+  .mantra-transition { top: 60px; }
   .hero { min-height: 440px; }
   .hero-open img {
     width: 100%;
