@@ -14,6 +14,27 @@ function text(value) {
   return value == null ? "" : String(value);
 }
 
+// Artwork filenames may be entered as "painting.jpg" or "images/painting.jpg".
+// Bare filenames are resolved relative to the repository's images/ folder.
+function resolveImagePath(path) {
+  const value = text(path).trim();
+  if (!value) return "";
+  if (/^(https?:|data:|\/)/i.test(value) || value.includes("/")) return value;
+  return "images/" + value;
+}
+
+async function renderInstagramLinks() {
+  try {
+    const config = await readJson(DATA.config);
+    if (!safeExternalLink(config.instagramUrl)) return;
+    document.querySelectorAll("[data-instagram-link]").forEach(link => {
+      link.href = config.instagramUrl;
+    });
+  } catch (error) {
+    // Keep the fallback URL in the HTML if configuration cannot be loaded.
+  }
+}
+
 function safeExternalLink(url) {
   return /^https?:\/\//i.test(url || "");
 }
@@ -33,7 +54,7 @@ async function renderHome() {
     }
     container.innerHTML = "";
     const img = document.createElement("img");
-    img.src = featured.image;
+    img.src = resolveImagePath(featured.image);
     img.alt = text(featured.alt || featured.title || "Painting by Nancy Nguyen");
     img.fetchPriority = "high";
     container.appendChild(img);
@@ -50,7 +71,7 @@ function openArtworkDialog(work) {
   const imageWrap = document.createElement("div");
   imageWrap.className = "dialog-image-wrap";
   const img = document.createElement("img");
-  img.src = work.image;
+  img.src = resolveImagePath(work.image);
   img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
   imageWrap.appendChild(img);
   content.appendChild(imageWrap);
@@ -160,6 +181,7 @@ async function renderExhibitions() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  renderInstagramLinks();
   renderHome();
   renderWorks();
   renderExhibitions();
