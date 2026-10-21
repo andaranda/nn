@@ -252,7 +252,7 @@ function setupMantraTransition() {
       setFooterOpacity(0.65);
     } else {
       setFooterOpacity(0);
-      if (nearBoundary) setOpacity(0.22);
+      setOpacity(nearBoundary ? 0.22 : 0);
     }
 
     window.clearTimeout(hideTimer);
@@ -265,7 +265,10 @@ function setupMantraTransition() {
   setOpacity(0);
   setFooterOpacity(0);
   window.addEventListener("scroll", updateDuringScroll, { passive: true });
-  window.addEventListener("resize", () => setOpacity(0));
+  window.addEventListener("resize", () => {
+    setOpacity(0);
+    setFooterOpacity(0);
+  });
 }
 function setupHeader() {
   const header = document.querySelector(".site-header");
