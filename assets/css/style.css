@@ -138,3 +138,27 @@ a:hover { text-decoration: underline; text-underline-offset: 3px; }
   .exhibition-list li { grid-template-columns: 3.4em minmax(0, 1fr); gap: 8px; }
 }
 @media (max-width: 360px) { .works-grid { columns: 1; } }
+
+/* Compact, accessible Instagram icon link */
+.instagram-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  vertical-align: middle;
+}
+.instagram-link svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.instagram-link svg .instagram-dot { fill: currentColor; stroke: none; }
+.instagram-link:hover { opacity: .68; }
+.instagram-link:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
