@@ -218,19 +218,34 @@ function setupDialog() {
 
 function setupMantraTransition() {
   const hero = document.querySelector(".hero");
-  const mantra = document.querySelector(".mantra-transition");
-  if (!hero || !mantra) return;
+  const works = document.querySelector("#works");
+  const context = document.querySelector("#exhibitions");
+  if (!hero || !works || !context) return;
+
   const update = () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       document.documentElement.style.setProperty("--mantra-opacity", "0");
       return;
     }
-    const progress = window.scrollY / Math.max(hero.offsetHeight, 1);
-    const peak = 0.82;
-    const distance = Math.abs(progress - peak);
-    const opacity = Math.max(0, 1 - distance / 0.19) * 0.22;
+
+    const scrollY = window.scrollY;
+    const viewport = window.innerHeight || 1;
+    const boundaries = [
+      hero.offsetTop + hero.offsetHeight,
+      context.offsetTop
+    ];
+    let opacity = 0;
+
+    boundaries.forEach(boundary => {
+      const distance = Math.abs(scrollY - boundary);
+      const windowSize = viewport * 0.24;
+      const strength = Math.max(0, 1 - distance / windowSize);
+      opacity = Math.max(opacity, strength * 0.22);
+    });
+
     document.documentElement.style.setProperty("--mantra-opacity", String(opacity));
   };
+
   update();
   window.addEventListener("scroll", update, { passive: true });
   window.addEventListener("resize", update);
