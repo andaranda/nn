@@ -48,6 +48,8 @@ function openArtworkDialog(work) {
   const img = document.createElement("img");
   img.src = resolveImagePath(work.image);
   img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
+  img.addEventListener("click", () => dialog.close());
+  img.style.cursor = "zoom-out";
   imageWrap.appendChild(img);
   content.appendChild(imageWrap);
 
@@ -192,13 +194,13 @@ function setupMenu() {
   toggle.addEventListener("click", () => {
     const isOpen = toggle.getAttribute("aria-expanded") === "true";
     toggle.setAttribute("aria-expanded", String(!isOpen));
-    toggle.textContent = isOpen ? "Menu" : "Close";
+    toggle.setAttribute("aria-label", isOpen ? "Open navigation" : "Close navigation");
     menu.hidden = isOpen;
   });
   menu.querySelectorAll("a[href^='#']").forEach(link => {
     link.addEventListener("click", () => {
       toggle.setAttribute("aria-expanded", "false");
-      toggle.textContent = "Menu";
+      toggle.setAttribute("aria-label", "Open navigation");
       menu.hidden = true;
     });
   });
@@ -212,6 +214,26 @@ function setupDialog() {
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
   });
+}
+
+function setupMantraTransition() {
+  const hero = document.querySelector(".hero");
+  const mantra = document.querySelector(".mantra-transition");
+  if (!hero || !mantra) return;
+  const update = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      document.documentElement.style.setProperty("--mantra-opacity", "0");
+      return;
+    }
+    const progress = window.scrollY / Math.max(hero.offsetHeight, 1);
+    const peak = 0.82;
+    const distance = Math.abs(progress - peak);
+    const opacity = Math.max(0, 1 - distance / 0.19) * 0.22;
+    document.documentElement.style.setProperty("--mantra-opacity", String(opacity));
+  };
+  update();
+  window.addEventListener("scroll", update, { passive: true });
+  window.addEventListener("resize", update);
 }
 
 function setupHeader() {
@@ -230,4 +252,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupMenu();
   setupDialog();
   setupHeader();
+  setupMantraTransition();
 });
