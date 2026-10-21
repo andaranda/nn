@@ -1,12 +1,62 @@
 [
   {
     "id": "NN001",
-    "title": "Replace with artwork title",
-    "year": "",
-    "medium": "",
-    "dimensions": "",
-    "image": "",
-    "alt": "Replace with a concise description of the painting",
-    "description": ""
+    "title": "Naga Comes to Say Hello",
+    "year": "2005",
+    "medium": "Oil on silk",
+    "dimensions": "40 x 40 inches",
+    "image": "NagaComesToSayHello.jpg",
+    "alt": "Two piece painting, dark and light",
+    "description": "Two piece painting, dark and light."
+  },
+  {
+    "id": "NN002",
+    "title": "Entering the Belly of a Horse and Coming Out the Womb of a Mule",
+    "year": "2005",
+    "medium": "Oil on silk on canvas",
+    "dimensions": "40 x 116 inches",
+    "image": "EnteringTheBellyOfAHorseAndComingOutTheWombOfAMule.jpg",
+    "alt": "Central green on dark, warm surroundings",
+    "description": "Central green on dark, warm surroundings."
+  },
+  {
+    "id": "NN003",
+    "title": "Two Lovers Getting Ready for Sleep",
+    "year": "2005",
+    "medium": "Oil on silk",
+    "dimensions": "18 x 16 inches",
+    "image": "TwoLoversGettingReadyforSleep.jpg",
+    "alt": "Contemplative painting, with lots of movement",
+    "description": "Dark with yellow-green sections."
+  },
+  {
+    "id": "NN004",
+    "title": "Into the Bardo We Go",
+    "year": "2005",
+    "medium": "Oil on canvas",
+    "dimensions": "40 x 40 inches",
+    "image": "IntoTheBardoWeGo.jpg",
+    "alt": "Contemplative painting, with lots of movement",
+    "description": "Dark with yellow-green sections."
+  },
+  {
+    "id": "NN005",
+    "title": "Your Gods are in Rebirth",
+    "year": "2005",
+    "medium": "Oil on silk",
+    "dimensions": "25 x 26 inches",
+    "image": "YourGodsareinRebirth.jpg",
+    "alt": "Contemplative painting, with lots of movement",
+    "description": "Black and red square on the outside, movement inside."
+  },
+  {
+    "id": "NN006",
+    "title": "A Duck, Again",
+    "year": "2005",
+    "medium": "Oil on silk",
+    "dimensions": "17 x 16 inches",
+    "image": "ADuckAgain.jpg",
+    "alt": "Contemplative painting, with lots of movement",
+    "description": "Green and orange tones."
   }
 ]
