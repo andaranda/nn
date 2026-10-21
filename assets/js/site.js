@@ -218,39 +218,45 @@ function setupDialog() {
 
 function setupMantraTransition() {
   const hero = document.querySelector(".hero");
-  const works = document.querySelector("#works");
   const context = document.querySelector("#exhibitions");
-  if (!hero || !works || !context) return;
+  const footer = document.querySelector(".site-footer");
+  if (!hero || !context || !footer) return;
 
-  const update = () => {
+  let hideTimer;
+  const root = document.documentElement;
+
+  const setOpacity = value => {
+    root.style.setProperty("--mantra-opacity", String(value));
+  };
+
+  const updateDuringScroll = () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      document.documentElement.style.setProperty("--mantra-opacity", "0");
+      setOpacity(0);
       return;
     }
 
     const scrollY = window.scrollY;
     const viewport = window.innerHeight || 1;
+    const maxScroll = Math.max(0, document.documentElement.scrollHeight - viewport);
     const boundaries = [
       hero.offsetTop + hero.offsetHeight,
-      context.offsetTop
+      context.offsetTop,
+      maxScroll
     ];
-    let opacity = 0;
+    const nearBoundary = boundaries.some(boundary =>
+      Math.abs(scrollY - boundary) < viewport * 0.38
+    );
 
-    boundaries.forEach(boundary => {
-      const distance = Math.abs(scrollY - boundary);
-      const windowSize = viewport * 0.24;
-      const strength = Math.max(0, 1 - distance / windowSize);
-      opacity = Math.max(opacity, strength * 0.22);
-    });
+    if (nearBoundary) setOpacity(0.22);
 
-    document.documentElement.style.setProperty("--mantra-opacity", String(opacity));
+    window.clearTimeout(hideTimer);
+    hideTimer = window.setTimeout(() => setOpacity(0), 260);
   };
 
-  update();
-  window.addEventListener("scroll", update, { passive: true });
-  window.addEventListener("resize", update);
+  setOpacity(0);
+  window.addEventListener("scroll", updateDuringScroll, { passive: true });
+  window.addEventListener("resize", () => setOpacity(0));
 }
-
 function setupHeader() {
   const header = document.querySelector(".site-header");
   if (!header) return;
