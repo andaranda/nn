@@ -109,7 +109,7 @@ async function renderWorks() {
       button.className = "work-card";
       button.setAttribute("aria-label", "View " + text(work.title || "artwork"));
       const img = document.createElement("img");
-      img.src = work.image;
+      img.src = resolveImagePath(work.image);
       img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
       img.loading = "lazy";
       button.appendChild(img);
