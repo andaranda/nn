@@ -224,14 +224,13 @@ function setupMantraTransition() {
 
   let hideTimer;
   const root = document.documentElement;
-
-  const setOpacity = value => {
-    root.style.setProperty("--mantra-opacity", String(value));
-  };
+  const setOpacity = value => root.style.setProperty("--mantra-opacity", String(value));
+  const setFooterOpacity = value => root.style.setProperty("--footer-mantra-opacity", String(value));
 
   const updateDuringScroll = () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setOpacity(0);
+      setFooterOpacity(0);
       return;
     }
 
@@ -247,13 +246,24 @@ function setupMantraTransition() {
       Math.abs(scrollY - boundary) < viewport * 0.38
     );
 
-    if (nearBoundary) setOpacity(0.22);
+    const atBottom = maxScroll - scrollY < viewport * 0.38;
+    if (atBottom) {
+      setOpacity(0);
+      setFooterOpacity(0.65);
+    } else {
+      setFooterOpacity(0);
+      if (nearBoundary) setOpacity(0.22);
+    }
 
     window.clearTimeout(hideTimer);
-    hideTimer = window.setTimeout(() => setOpacity(0), 260);
+    hideTimer = window.setTimeout(() => {
+      setOpacity(0);
+      setFooterOpacity(0);
+    }, 260);
   };
 
   setOpacity(0);
+  setFooterOpacity(0);
   window.addEventListener("scroll", updateDuringScroll, { passive: true });
   window.addEventListener("resize", () => setOpacity(0));
 }
