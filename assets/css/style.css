@@ -252,12 +252,30 @@ button { color: inherit; font: inherit; }
 .education p { margin: 0; }
 
 .site-footer {
+  position: relative;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 20px;
   padding: 22px var(--page-margin) 30px;
   border-top: 1px solid var(--rule);
   font-size: .8rem;
+}
+.footer-mantra {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  justify-content: center;
+  padding: 5px 0;
+  opacity: var(--footer-mantra-opacity, 0);
+  pointer-events: none;
+  transition: opacity .12s linear;
+}
+.footer-mantra span {
+  color: #777;
+  font-size: 10px;
+  letter-spacing: .14em;
+  font-weight: 300;
 }
 .footer-name { letter-spacing: .01em; }
 
