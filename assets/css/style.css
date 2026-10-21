@@ -32,7 +32,7 @@ button { color: inherit; font: inherit; }
   justify-content: space-between;
   gap: 24px;
   padding: 18px var(--page-margin);
-  transition: background-color .25s ease, border-color .25s ease;
+  transition: background-color .12s linear, border-color .12s linear;
   border-bottom: 1px solid transparent;
 }
 .site-header.is-scrolled {
