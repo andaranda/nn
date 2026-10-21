@@ -5,6 +5,7 @@
   --muted: #777;
   --rule: #e8e8e8;
   --page-width: 1680px;
+  --mantra-opacity: 0;
 }
 * { box-sizing: border-box; }
 html { background: #fff; scroll-behavior: smooth; scroll-padding-top: 72px; }
@@ -48,13 +49,28 @@ button { color: inherit; font: inherit; }
 }
 .header-actions { position: relative; }
 .menu-toggle {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  padding: 4px;
   border: 0;
-  padding: 6px 0 6px 12px;
   background: transparent;
   cursor: pointer;
-  font-size: .85rem;
 }
-.menu-toggle:hover { text-decoration: underline; text-underline-offset: 4px; }
+.menu-toggle span {
+  display: block;
+  width: 19px;
+  height: 1px;
+  background: currentColor;
+  transition: transform .2s ease;
+}
+.menu-toggle[aria-expanded="true"] span:first-child { transform: translateY(3px) rotate(45deg); }
+.menu-toggle[aria-expanded="true"] span:last-child { transform: translateY(-3px) rotate(-45deg); }
+.menu-toggle:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; }
 .site-menu {
   position: absolute;
   top: calc(100% + 14px);
@@ -103,8 +119,8 @@ button { color: inherit; font: inherit; }
   display: block;
   width: auto;
   height: auto;
-  max-width: 84vw;
-  max-height: 80svh;
+  max-width: 96vw;
+  max-height: 94svh;
   object-fit: contain;
 }
 .hero-scroll {
@@ -128,14 +144,33 @@ button { color: inherit; font: inherit; }
 }
 
 .works-section {
+  position: relative;
   width: 100%;
   max-width: var(--page-width);
   margin: 0 auto;
-  padding: 48px var(--page-margin) clamp(100px, 14vw, 210px);
+  padding: 24px var(--page-margin) clamp(100px, 14vw, 210px);
 }
 .works-grid {
   columns: 3 280px;
   column-gap: clamp(16px, 2.4vw, 38px);
+}
+.mantra-transition {
+  position: fixed;
+  z-index: 15;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  opacity: var(--mantra-opacity);
+  transition: opacity .12s linear;
+}
+.mantra-transition span {
+  padding: 8px 12px;
+  color: #555;
+  background: rgb(255 255 255 / .68);
+  font-size: clamp(10px, 1vw, 12px);
+  letter-spacing: .12em;
+  font-weight: 300;
 }
 .work-card {
   display: block;
@@ -298,6 +333,7 @@ button { color: inherit; font: inherit; }
   .exhibition-columns { grid-template-columns: 1fr; gap: 42px; }
   .education { grid-template-columns: 1fr; gap: 10px; margin-top: 42px; }
   .artwork-dialog { padding: 12px; }
+  .dialog-close { display: none; }
   .dialog-image-wrap img { max-height: 62svh; }
 }
 @media (prefers-reduced-motion: reduce) {
