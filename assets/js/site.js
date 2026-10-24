@@ -193,9 +193,17 @@ function setupCarousel(track) {
     },
     onFinish: () => {
       isAnimating = false;
-      if (!mantra) return;
-      window.clearTimeout(mantraTimer);
-      mantraTimer = window.setTimeout(() => mantra.classList.remove("is-active"), 180);
+      if (mantra) {
+        window.clearTimeout(mantraTimer);
+        mantraTimer = window.setTimeout(() => mantra.classList.remove("is-active"), 180);
+      }
+
+      // Start the cooldown after the slide animation, not on every wheel event.
+      // Momentum cannot keep restarting this timer while the transition runs.
+      window.clearTimeout(wheelQuietTimer);
+      wheelQuietTimer = window.setTimeout(() => {
+        wheelGestureActive = false;
+      }, 900);
     }
   });
 
@@ -206,25 +214,16 @@ function setupCarousel(track) {
     randomizeArtworkAt(data.index + 1);
   });
 
-  // A trackpad gesture can emit momentum events for much longer than a mouse
-  // wheel. Keep the gesture locked until 800ms after the final wheel event.
+  // Accept one wheel event per gesture. Momentum events are ignored without
+  // extending the lock, including events received during the mantra transition.
   track.addEventListener("wheel", event => {
     event.preventDefault();
+    if (isAnimating || wheelGestureActive) return;
+    if (event.deltaY === 0) return;
 
-    window.clearTimeout(wheelQuietTimer);
-    wheelQuietTimer = window.setTimeout(() => {
-      wheelGestureActive = false;
-    }, 800);
-
-    if (wheelGestureActive) return;
     wheelGestureActive = true;
-
-    // If a new gesture begins during a slide transition, swallow it and its
-    // momentum. The quiet timer above will release the lock after it ends.
-    if (isAnimating) return;
-
     if (event.deltaY > 0) pages.next();
-    else if (event.deltaY < 0) pages.prev();
+    else pages.prev();
   }, { passive: false });
 }
 
