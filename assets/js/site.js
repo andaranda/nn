@@ -221,6 +221,18 @@ function setupCarousel(track) {
     });
   }, { passive: true });
 
+  // Pageable cancels touchstart by default, which can suppress the browser's
+  // synthetic click on buttons and links. Let taps complete normally; CSS
+  // touch-action:none keeps the browser from taking over vertical swipe gestures.
+  if (window.Pageable.prototype && !window.Pageable.prototype.__tapSafe) {
+    const originalPreventDefault = window.Pageable.prototype._preventDefault;
+    window.Pageable.prototype._preventDefault = function (event) {
+      if (event && event.type === "touchstart") return;
+      return originalPreventDefault.call(this, event);
+    };
+    window.Pageable.prototype.__tapSafe = true;
+  }
+
   const pages = new window.Pageable("#wheel-track", {
     orientation: "vertical",
     infinite: true,
