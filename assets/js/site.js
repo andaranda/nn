@@ -154,9 +154,8 @@ function setupMantraTransition() {
   const hero = document.querySelector(".hero");
   const track = document.querySelector("#wheel-track");
   const contact = document.querySelector("#contact");
-  const loopStart = document.querySelector("#loop-start");
-  const loopEnd = document.querySelector("#loop-end");
-  if (!hero || !track || !contact || !loopStart || !loopEnd) return;
+  const returnLoop = document.querySelector("#return-loop");
+  if (!hero || !track || !contact || !returnLoop) return;
 
   let hideTimer;
   const root = document.documentElement;
@@ -172,9 +171,8 @@ function setupMantraTransition() {
     const boundaries = [
       hero.offsetTop + hero.offsetHeight,
       ...Array.from(track.children).map(card => card.offsetTop),
-      loopStart.offsetTop,
       contact.offsetTop,
-      loopEnd.offsetTop
+      returnLoop.offsetTop
     ];
     const nearBoundary = boundaries.some(boundary =>
       Math.abs(scrollY - boundary) < viewport * 0.34
@@ -190,13 +188,15 @@ function setupMantraTransition() {
 }
 
 function setupLoop() {
-  const loopEnd = document.querySelector("#loop-end");
-  const loopStart = document.querySelector("#loop-start");
-  if (!loopEnd || !loopStart) return;
+  const returnLoop = document.querySelector("#return-loop");
+  const cover = document.querySelector("#loop-cover");
+  const firstArtwork = document.querySelector("#wheel-start");
+  if (!returnLoop || !cover || !firstArtwork) return;
 
   let lastScrollY = window.scrollY;
   let scrollingDown = true;
   let resetting = false;
+  let releaseTimer;
 
   window.addEventListener("scroll", () => {
     scrollingDown = window.scrollY > lastScrollY;
@@ -209,22 +209,35 @@ function setupLoop() {
         !scrollingDown || resetting) return;
 
     resetting = true;
-    // Both gates have the same appearance. Move from the trailing gate to
-    // the matching gate before the paintings, so the next scroll reveals
-    // painting one rather than the landing screen.
-    const root = document.documentElement;
-    const previousBehavior = root.style.scrollBehavior;
-    root.style.scrollBehavior = "auto";
-    window.scrollTo(0, loopStart.offsetTop);
-    requestAnimationFrame(() => {
-      root.style.scrollBehavior = previousBehavior;
-      lastScrollY = window.scrollY;
-      scrollingDown = false;
-      resetting = false;
-    });
+    window.clearTimeout(releaseTimer);
+    cover.classList.add("is-visible");
+
+    // Keep the final mantra card visible while moving the page back to the
+    // first artwork. Disable snapping only for the instant repositioning.
+    window.setTimeout(() => {
+      const root = document.documentElement;
+      const previousSnap = root.style.scrollSnapType;
+      const previousBehavior = root.style.scrollBehavior;
+      root.style.scrollSnapType = "none";
+      root.style.scrollBehavior = "auto";
+      window.scrollTo(0, firstArtwork.getBoundingClientRect().top + window.scrollY);
+
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          root.style.scrollSnapType = previousSnap;
+          root.style.scrollBehavior = previousBehavior;
+          lastScrollY = window.scrollY;
+          scrollingDown = false;
+          releaseTimer = window.setTimeout(() => {
+            cover.classList.remove("is-visible");
+            resetting = false;
+          }, 220);
+        });
+      });
+    }, 180);
   }, { threshold: [0.6, 0.8] });
 
-  observer.observe(loopEnd);
+  observer.observe(returnLoop);
 }
 
 function setupHeader() {
