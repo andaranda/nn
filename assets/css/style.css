@@ -59,12 +59,12 @@ button { color: inherit; font: inherit; }
   align-items: center;
   justify-content: center;
   gap: 7px;
-  min-width: 52px;
+  min-width: 62px;
   min-height: 44px;
   color: #777;
   touch-action: manipulation;
 }
-.instagram-header-link svg { display: block; width: 29px; height: 29px; }
+.instagram-header-link svg { display: block; width: 35px; height: 35px; }
 .instagram-header-link span { font-size: 22px; line-height: 1; }
 .instagram-header-link:hover { color: #333; text-decoration: none; }
 .instagram-header-link:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
@@ -78,7 +78,7 @@ button { color: inherit; font: inherit; }
 }
 
 .mantra-transition {
-  position: absolute;
+  position: fixed;
   left: 50%;
   top: 50%;
   display: flex;
@@ -171,8 +171,8 @@ button { color: inherit; font: inherit; }
   :root { --page-margin: 14px; }
   .site-header { min-height: 60px; padding-top: 14px; padding-bottom: 14px; }
   .mantra-transition span { font-size: clamp(13px, 4vw, 16px); letter-spacing: .065em; }
-  .instagram-header-link { gap: 5px; min-width: 48px; }
-  .instagram-header-link svg { width: 27px; height: 27px; }
+  .instagram-header-link { gap: 5px; min-width: 58px; }
+  .instagram-header-link svg { width: 35px; height: 35px; }
   .instagram-header-link span { font-size: 21px; }
   .wheel-card { min-height: 440px; }
   #wheel-track { min-height: 440px; }
