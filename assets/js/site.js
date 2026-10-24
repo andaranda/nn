@@ -140,20 +140,44 @@ function setupCarousel(track) {
 
   const artworkSlides = [...track.querySelectorAll(".wheel-card")];
   const chooseCrop = image => {
-    const randomPosition = () => Math.round(5 + Math.random() * 90);
-    const previousX = Number(image.dataset.cropX || 50);
-    const previousY = Number(image.dataset.cropY || 50);
-    let x = randomPosition();
-    let y = randomPosition();
+    const previousX = Number(image.dataset.cropX ?? 0.5);
+    const previousY = Number(image.dataset.cropY ?? 0.5);
+    let x = 0.05 + Math.random() * 0.9;
+    let y = 0.05 + Math.random() * 0.9;
 
-    // Ensure a visibly different fragment on each revisit.
-    if (Math.abs(x - previousX) < 25) x = x < 50 ? Math.min(95, x + 32) : Math.max(5, x - 32);
-    if (Math.abs(y - previousY) < 25) y = y < 50 ? Math.min(95, y + 32) : Math.max(5, y - 32);
+    // Avoid returning to almost the same region when a painting reappears.
+    if (Math.abs(x - previousX) < 0.25) x = x < 0.5 ? Math.min(0.95, x + 0.32) : Math.max(0.05, x - 0.32);
+    if (Math.abs(y - previousY) < 0.25) y = y < 0.5 ? Math.min(0.95, y + 0.32) : Math.max(0.05, y - 0.32);
 
     image.dataset.cropX = String(x);
     image.dataset.cropY = String(y);
-    image.style.setProperty("--crop-x", x + "%");
-    image.style.setProperty("--crop-y", y + "%");
+    positionArtworkImage(image);
+  };
+
+  // The viewport acts as a window onto the painting. Keep source pixels at
+  // native scale when possible; enlarge small prototype files only to cover it.
+  const positionArtworkImage = image => {
+    if (!image.naturalWidth || !image.naturalHeight) return;
+    const viewport = image.closest(".wheel-artwork");
+    if (!viewport) return;
+    const width = viewport.clientWidth;
+    const height = viewport.clientHeight;
+    if (!width || !height) return;
+
+    const scale = Math.max(1, width / image.naturalWidth, height / image.naturalHeight);
+    const imageWidth = image.naturalWidth * scale;
+    const imageHeight = image.naturalHeight * scale;
+    const overflowX = Math.max(0, imageWidth - width);
+    const overflowY = Math.max(0, imageHeight - height);
+    const cropX = Number(image.dataset.cropX ?? 0.5);
+    const cropY = Number(image.dataset.cropY ?? 0.5);
+    const panX = (cropX - 0.5) * overflowX;
+    const panY = (cropY - 0.5) * overflowY;
+
+    image.style.width = imageWidth + "px";
+    image.style.height = imageHeight + "px";
+    image.style.setProperty("--pan-x", panX + "px");
+    image.style.setProperty("--pan-y", panY + "px");
   };
 
   const randomizeArtworkAt = index => {
@@ -163,11 +187,21 @@ function setupCarousel(track) {
     if (image) chooseCrop(image);
   };
 
-  // Assign initial crops before the first slide is shown.
+  // Assign crops before display; resize keeps the same relative region.
   artworkSlides.forEach(slide => {
     const image = slide.querySelector(".wheel-artwork img");
-    if (image) chooseCrop(image);
+    if (!image) return;
+    chooseCrop(image);
+    image.addEventListener("load", () => positionArtworkImage(image));
+    if (image.complete) positionArtworkImage(image);
   });
+
+  window.addEventListener("resize", () => {
+    artworkSlides.forEach(slide => {
+      const image = slide.querySelector(".wheel-artwork img");
+      if (image) positionArtworkImage(image);
+    });
+  }, { passive: true });
 
   const pages = new window.Pageable("#wheel-track", {
     orientation: "vertical",
