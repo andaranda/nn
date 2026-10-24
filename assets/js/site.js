@@ -78,28 +78,13 @@ function openArtworkDialog(work) {
 }
 
 async function renderHomeAndWheel() {
-  const hero = document.querySelector("#home-artwork");
   const track = document.querySelector("#wheel-track");
   const contact = document.querySelector("#contact");
-  if (!hero || !track || !contact) return;
+  if (!track || !contact) return;
 
   try {
     const { artworks, config } = await loadSiteData();
-    const featured = artworks.find(work => work.id === config.homepageArtworkId) || artworks[0];
-    if (!featured) throw new Error("No artwork records with images were found.");
-
-    hero.innerHTML = "";
-    const heroButton = document.createElement("button");
-    heroButton.type = "button";
-    heroButton.className = "hero-open";
-    heroButton.setAttribute("aria-label", "View details for " + text(featured.title || "featured painting"));
-    const heroImage = document.createElement("img");
-    heroImage.src = resolveImagePath(featured.image);
-    heroImage.alt = text(featured.alt || featured.title || "Painting by Nancy Nguyen");
-    heroImage.fetchPriority = "high";
-    heroButton.appendChild(heroImage);
-    heroButton.addEventListener("click", () => openArtworkDialog(featured));
-    hero.appendChild(heroButton);
+    if (!artworks.length) throw new Error("No artwork records with images were found.");
 
     let works = artworks.slice();
     if (Array.isArray(config.curatedArtworkIds) && config.curatedArtworkIds.length) {
@@ -107,7 +92,7 @@ async function renderHomeAndWheel() {
       works = works.filter(work => order.has(work.id))
         .sort((a, b) => order.get(a.id) - order.get(b.id));
     }
-    if (!works.length) works = [featured];
+    if (!works.length) works = artworks.slice();
 
     track.innerHTML = "";
     works.forEach((work, index) => {
@@ -135,8 +120,7 @@ async function renderHomeAndWheel() {
     track.appendChild(contact);
     setupCarousel(track);
   } catch (error) {
-    hero.innerHTML = '<p class="empty-state">Artwork data could not be loaded. Preview through a local server, not by opening the HTML file directly.</p>';
-    track.innerHTML = '<section class="wheel-card wheel-loading"><p class="empty-state">Check the records in <code>data/artworks.json</code>.</p></section>';
+    track.innerHTML = '<section class="wheel-card wheel-loading"><p class="empty-state">Artwork data could not be loaded. Check <code>data/artworks.json</code> and preview through a local server.</p></section>';
     console.error(error);
   }
 }
@@ -153,6 +137,33 @@ function setupCarousel(track) {
   let wheelQuietTimer;
   let wheelGestureActive = false;
   let isAnimating = false;
+
+  const chooseCrop = image => {
+    const randomPosition = () => Math.round(8 + Math.random() * 84);
+    const previousX = Number(image.dataset.cropX || 50);
+    const previousY = Number(image.dataset.cropY || 50);
+    let x = randomPosition();
+    let y = randomPosition();
+
+    // Avoid a nearly identical crop on consecutive visits to this artwork.
+    if (Math.abs(x - previousX) < 18) x = x < 50 ? Math.min(92, x + 24) : Math.max(8, x - 24);
+    if (Math.abs(y - previousY) < 18) y = y < 50 ? Math.min(92, y + 24) : Math.max(8, y - 24);
+
+    image.dataset.cropX = String(x);
+    image.dataset.cropY = String(y);
+    image.style.setProperty("--crop-x", x + "%");
+    image.style.setProperty("--crop-y", y + "%");
+  };
+
+  const randomizeArtworkAt = index => {
+    const slides = [...track.querySelectorAll(".wheel-card")];
+    const slide = slides[index];
+    const image = slide && slide.querySelector(".wheel-artwork img");
+    if (image) chooseCrop(image);
+  };
+
+  // Give the first painting a crop immediately, before the visitor moves.
+  randomizeArtworkAt(0);
 
   const pages = new window.Pageable("#wheel-track", {
     orientation: "vertical",
@@ -182,6 +193,12 @@ function setupCarousel(track) {
       window.clearTimeout(mantraTimer);
       mantraTimer = window.setTimeout(() => mantra.classList.remove("is-active"), 180);
     }
+  });
+
+  // Pageable reports the current page index after each completed transition.
+  // A new random crop is chosen only for the artwork that has just arrived.
+  pages.on("scroll.end", data => {
+    randomizeArtworkAt(data.index);
   });
 
   // One wheel/trackpad gesture advances at most one slide. Inertial wheel
