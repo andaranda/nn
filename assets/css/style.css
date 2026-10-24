@@ -53,63 +53,13 @@ button { color: inherit; font: inherit; }
 }
 .site-name:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
 
-.hero, .wheel-card, .contact-card {
+.wheel-card, .contact-card {
   position: relative;
   width: 100%;
   height: 100svh;
   min-height: 460px;
   overflow: hidden;
 }
-.hero {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-}
-.hero-artwork, .hero-open {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.hero-open {
-  padding: 0;
-  border: 0;
-  background: transparent;
-  cursor: zoom-in;
-}
-.hero-open img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  max-width: none;
-  max-height: none;
-  object-fit: cover;
-  object-position: center;
-}
-.hero-scroll {
-  position: absolute;
-  bottom: 22px;
-  left: 50%;
-  width: 30px;
-  height: 30px;
-  transform: translateX(-50%);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #fff;
-  mix-blend-mode: difference;
-}
-.hero-scroll span {
-  display: block;
-  width: 8px;
-  height: 8px;
-  border-right: 1px solid currentColor;
-  border-bottom: 1px solid currentColor;
-  transform: rotate(45deg) translate(-2px, -2px);
-}
-.hero-open:focus-visible { outline: 1px solid currentColor; outline-offset: -5px; }
 
 .mantra-transition {
   position: fixed;
@@ -161,30 +111,32 @@ button { color: inherit; font: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: clamp(28px, 5vw, 76px);
+  padding: 0;
   background: #fff;
 }
 .wheel-artwork {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   padding: 0;
   border: 0;
-  background: transparent;
+  overflow: hidden;
+  background: #fff;
   cursor: zoom-in;
 }
 .wheel-artwork img {
   display: block;
-  width: auto;
-  height: auto;
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--crop-x, 50%) var(--crop-y, 50%);
+  transform: scale(1.12);
+  transition: object-position .65s cubic-bezier(.2,.65,.25,1), opacity .2s linear;
 }
-.wheel-artwork:focus-visible { outline: 1px solid currentColor; outline-offset: 5px; }
-.wheel-artwork:hover img { opacity: .96; }
+.wheel-artwork:focus-visible { outline: 1px solid currentColor; outline-offset: -5px; }
+.wheel-artwork:hover img { opacity: .97; }
 .wheel-loading { align-items: center; justify-content: center; }
 
 .contact-card {
@@ -259,13 +211,12 @@ button { color: inherit; font: inherit; }
   :root { --page-margin: 14px; }
   .site-header { min-height: 60px; padding-top: 14px; padding-bottom: 14px; }
   .mantra-transition { top: 60px; }
-  .hero, .wheel-card, .contact-card { min-height: 440px; }
+  .wheel-card, .contact-card { min-height: 440px; }
   #wheel-track { min-height: 440px; }
   #wheel-track .wheel-card, #wheel-track .contact-card { min-height: 0; }
   #wheel-track.carousel-fallback .wheel-card,
   #wheel-track.carousel-fallback .contact-card { min-height: 440px; }
   .wheel-card { padding: 22px 14px; }
-  .hero-scroll { bottom: 16px; }
   .artwork-dialog { padding: 12px; }
   .dialog-close { display: none; }
   .dialog-image-wrap img { max-height: 62svh; }
