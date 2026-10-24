@@ -184,8 +184,25 @@ function setupCarousel(track) {
   const randomizeArtworkAt = index => {
     if (!artworkSlides.length) return;
     const wrappedIndex = (index % artworkSlides.length + artworkSlides.length) % artworkSlides.length;
-    const image = artworkSlides[wrappedIndex].querySelector(".wheel-artwork img");
-    if (image) chooseCrop(image);
+    const slide = artworkSlides[wrappedIndex];
+    const image = slide.querySelector(".wheel-artwork img");
+    if (!image) return;
+
+    chooseCrop(image);
+
+    // Pageable may create a loop copy of the first/last slide. Keep its crop
+    // synchronized with the source slide so the invisible loop reset cannot
+    // reveal a different region for a frame.
+    const anchor = slide.dataset.anchor;
+    if (!anchor) return;
+    track.querySelectorAll("[data-anchor]").forEach(copy => {
+      if (copy === slide || copy.dataset.anchor !== anchor) return;
+      const copyImage = copy.querySelector(".wheel-artwork img");
+      if (!copyImage) return;
+      copyImage.dataset.cropX = image.dataset.cropX;
+      copyImage.dataset.cropY = image.dataset.cropY;
+      positionArtworkImage(copyImage);
+    });
   };
 
   // Assign crops before display; resize keeps the same relative region.
