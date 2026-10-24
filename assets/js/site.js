@@ -80,7 +80,8 @@ function openArtworkDialog(work) {
 async function renderHomeAndWheel() {
   const hero = document.querySelector("#home-artwork");
   const track = document.querySelector("#wheel-track");
-  if (!hero || !track) return;
+  const contact = document.querySelector("#contact");
+  if (!hero || !track || !contact) return;
 
   try {
     const { artworks, config } = await loadSiteData();
@@ -112,8 +113,9 @@ async function renderHomeAndWheel() {
     works.forEach((work, index) => {
       const section = document.createElement("section");
       section.className = "wheel-card";
+      section.id = index === 0 ? "wheel-start" : "artwork-" + (index + 1);
+      section.dataset.anchor = "artwork-" + (index + 1);
       section.setAttribute("aria-label", "Painting " + (index + 1));
-      if (index === 0) section.id = "wheel-start";
 
       const button = document.createElement("button");
       button.type = "button";
@@ -129,15 +131,49 @@ async function renderHomeAndWheel() {
       track.appendChild(section);
     });
 
-    const returnImage = document.querySelector("#return-image");
-    if (returnImage) {
-      returnImage.src = resolveImagePath(featured.image);
-      returnImage.alt = "";
-    }
+    contact.dataset.anchor = "contact";
+    track.appendChild(contact);
+    setupCarousel(track);
   } catch (error) {
     hero.innerHTML = '<p class="empty-state">Artwork data could not be loaded. Preview through a local server, not by opening the HTML file directly.</p>';
     track.innerHTML = '<section class="wheel-card wheel-loading"><p class="empty-state">Check the records in <code>data/artworks.json</code>.</p></section>';
+    console.error(error);
   }
+}
+
+function setupCarousel(track) {
+  if (typeof window.Pageable !== "function") {
+    track.classList.add("carousel-fallback");
+    console.error("Pageable did not load; the artwork carousel could not be initialized.");
+    return;
+  }
+
+  const mantra = document.querySelector(".mantra-transition");
+  let mantraTimer;
+
+  new window.Pageable("#wheel-track", {
+    orientation: "vertical",
+    infinite: true,
+    pips: false,
+    animation: 480,
+    delay: 0,
+    events: {
+      wheel: true,
+      mouse: false,
+      touch: true,
+      keydown: true
+    },
+    onStart: () => {
+      if (!mantra || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      window.clearTimeout(mantraTimer);
+      mantra.classList.add("is-active");
+    },
+    onFinish: () => {
+      if (!mantra) return;
+      window.clearTimeout(mantraTimer);
+      mantraTimer = window.setTimeout(() => mantra.classList.remove("is-active"), 180);
+    }
+  });
 }
 
 function setupDialog() {
@@ -148,96 +184,6 @@ function setupDialog() {
   dialog.addEventListener("click", event => {
     if (event.target === dialog) dialog.close();
   });
-}
-
-function setupMantraTransition() {
-  const hero = document.querySelector(".hero");
-  const track = document.querySelector("#wheel-track");
-  const contact = document.querySelector("#contact");
-  const returnLoop = document.querySelector("#return-loop");
-  if (!hero || !track || !contact || !returnLoop) return;
-
-  let hideTimer;
-  const root = document.documentElement;
-  const setOpacity = value => root.style.setProperty("--mantra-opacity", String(value));
-
-  const updateDuringScroll = () => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setOpacity(0);
-      return;
-    }
-    const scrollY = window.scrollY;
-    const viewport = window.innerHeight || 1;
-    const boundaries = [
-      hero.offsetTop + hero.offsetHeight,
-      ...Array.from(track.children).map(card => card.offsetTop),
-      contact.offsetTop,
-      returnLoop.offsetTop
-    ];
-    const nearBoundary = boundaries.some(boundary =>
-      Math.abs(scrollY - boundary) < viewport * 0.34
-    );
-    setOpacity(nearBoundary ? 0.24 : 0);
-    window.clearTimeout(hideTimer);
-    hideTimer = window.setTimeout(() => setOpacity(0), 260);
-  };
-
-  setOpacity(0);
-  window.addEventListener("scroll", updateDuringScroll, { passive: true });
-  window.addEventListener("resize", () => setOpacity(0));
-}
-
-function setupLoop() {
-  const returnLoop = document.querySelector("#return-loop");
-  const cover = document.querySelector("#loop-cover");
-  const firstArtwork = document.querySelector("#wheel-start");
-  if (!returnLoop || !cover || !firstArtwork) return;
-
-  let lastScrollY = window.scrollY;
-  let scrollingDown = true;
-  let resetting = false;
-  let releaseTimer;
-
-  window.addEventListener("scroll", () => {
-    scrollingDown = window.scrollY > lastScrollY;
-    lastScrollY = window.scrollY;
-  }, { passive: true });
-
-  const observer = new IntersectionObserver(entries => {
-    const entry = entries[0];
-    if (!entry.isIntersecting || entry.intersectionRatio < 0.6 ||
-        !scrollingDown || resetting) return;
-
-    resetting = true;
-    window.clearTimeout(releaseTimer);
-    cover.classList.add("is-visible");
-
-    // Keep the final mantra card visible while moving the page back to the
-    // first artwork. Disable snapping only for the instant repositioning.
-    window.setTimeout(() => {
-      const root = document.documentElement;
-      const previousSnap = root.style.scrollSnapType;
-      const previousBehavior = root.style.scrollBehavior;
-      root.style.scrollSnapType = "none";
-      root.style.scrollBehavior = "auto";
-      window.scrollTo(0, firstArtwork.getBoundingClientRect().top + window.scrollY);
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          root.style.scrollSnapType = previousSnap;
-          root.style.scrollBehavior = previousBehavior;
-          lastScrollY = window.scrollY;
-          scrollingDown = false;
-          releaseTimer = window.setTimeout(() => {
-            cover.classList.remove("is-visible");
-            resetting = false;
-          }, 220);
-        });
-      });
-    }, 180);
-  }, { threshold: [0.6, 0.8] });
-
-  observer.observe(returnLoop);
 }
 
 function setupHeader() {
@@ -253,6 +199,4 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHomeAndWheel();
   setupDialog();
   setupHeader();
-  setupMantraTransition();
-  setupLoop();
 });
