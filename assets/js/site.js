@@ -205,12 +205,16 @@ function setupCarousel(track) {
   // events are swallowed until the gesture has gone quiet.
   track.addEventListener("wheel", event => {
     event.preventDefault();
+
+    // Ignore input during the actual slide animation without treating it as
+    // a consumed gesture. Once the animation ends, a fresh wheel movement
+    // can advance again instead of requiring the visitor to wait motionless.
+    if (isAnimating) return;
+
     if (!wheelGestureActive) {
       wheelGestureActive = true;
-      if (!isAnimating) {
-        if (event.deltaY > 0) pages.next();
-        else if (event.deltaY < 0) pages.prev();
-      }
+      if (event.deltaY > 0) pages.next();
+      else if (event.deltaY < 0) pages.prev();
     }
 
     window.clearTimeout(wheelQuietTimer);
