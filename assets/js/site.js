@@ -150,30 +150,57 @@ function setupCarousel(track) {
 
   const mantra = document.querySelector(".mantra-transition");
   let mantraTimer;
+  let wheelQuietTimer;
+  let wheelGestureActive = false;
+  let isAnimating = false;
 
-  new window.Pageable("#wheel-track", {
+  const pages = new window.Pageable("#wheel-track", {
     orientation: "vertical",
     infinite: true,
     pips: false,
-    animation: 480,
-    delay: 0,
+    animation: 700,
+    delay: 100,
+    swipeThreshold: 350,
+    freeScroll: false,
     events: {
-      wheel: true,
+      // Wheel input is handled below so a single trackpad/mouse gesture
+      // cannot queue multiple slide changes from its momentum events.
+      wheel: false,
       mouse: false,
       touch: true,
       keydown: true
     },
     onStart: () => {
+      isAnimating = true;
       if (!mantra || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       window.clearTimeout(mantraTimer);
       mantra.classList.add("is-active");
     },
     onFinish: () => {
+      isAnimating = false;
       if (!mantra) return;
       window.clearTimeout(mantraTimer);
       mantraTimer = window.setTimeout(() => mantra.classList.remove("is-active"), 180);
     }
   });
+
+  // One wheel/trackpad gesture advances at most one slide. Inertial wheel
+  // events are swallowed until the gesture has gone quiet.
+  track.addEventListener("wheel", event => {
+    event.preventDefault();
+    if (!wheelGestureActive) {
+      wheelGestureActive = true;
+      if (!isAnimating) {
+        if (event.deltaY > 0) pages.next();
+        else if (event.deltaY < 0) pages.prev();
+      }
+    }
+
+    window.clearTimeout(wheelQuietTimer);
+    wheelQuietTimer = window.setTimeout(() => {
+      wheelGestureActive = false;
+    }, 260);
+  }, { passive: false });
 }
 
 function setupDialog() {
