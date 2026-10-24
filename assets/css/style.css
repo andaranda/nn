@@ -61,7 +61,7 @@ button { color: inherit; font: inherit; }
   width: 44px;
   height: 44px;
   color: rgb(85 85 85 / .72);
-  filter: drop-shadow(0 1px 3px rgb(255 255 255 / .95)) drop-shadow(0 0 12px rgb(255 255 255 / .78));
+  filter: drop-shadow(0 1px 2px rgb(255 255 255 / .62)) drop-shadow(0 0 7px rgb(255 255 255 / .38));
   touch-action: manipulation;
 }
 .instagram-header-link svg { display: block; width: 23px; height: 23px; }
