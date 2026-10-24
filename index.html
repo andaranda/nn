@@ -6,8 +6,10 @@
   <meta name="description" content="Paintings by Nancy Nguyen.">
   <meta name="theme-color" content="#ffffff">
   <title>Nancy Nguyen</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=loop-8">
-  <script src="assets/js/site.js?v=loop-8" defer></script>
+  <link rel="stylesheet" href="https://unpkg.com/pageable@0.6.6/dist/pageable.min.css">
+  <link rel="stylesheet" href="assets/css/style.css?v=carousel-1">
+  <script src="https://unpkg.com/pageable@0.6.6/dist/pageable.min.js" defer></script>
+  <script src="assets/js/site.js?v=carousel-1" defer></script>
 </head>
 <body class="prayer-wheel">
   <header class="site-header">
@@ -25,25 +27,13 @@
     <div class="mantra-transition" aria-hidden="true"><span>oṃ tāre tuttāre ture svāhā</span></div>
 
     <div id="wheel-track" class="wheel-track" aria-label="Paintings">
-      <section id="wheel-start" class="wheel-card wheel-loading" aria-label="Paintings">
+      <section id="wheel-start" class="wheel-card wheel-loading" data-anchor="artwork-1" aria-label="Paintings">
         <p class="empty-state">Paintings will appear here when added to <code>data/artworks.json</code>.</p>
       </section>
-    </div>
-
-    <section id="contact" class="contact-card" aria-label="Contact">
-      <span>contact</span>
-      <a data-instagram-link href="https://www.instagram.com/oaht.n/" target="_blank" rel="noreferrer" aria-label="Contact Nancy Nguyen on Instagram">↗</a>
-    </section>
-
-    <section id="return-loop" class="return-loop" aria-label="Return">
-      <div class="return-circle" aria-hidden="true">
-        <img id="return-image" alt="">
-      </div>
-      <span class="return-mantra" aria-hidden="true">oṃ tāre tuttāre ture svāhā</span>
-    </section>
-
-    <div id="loop-cover" class="loop-cover" aria-hidden="true">
-      <span>oṃ tāre tuttāre ture svāhā</span>
+      <section id="contact" class="contact-card" data-anchor="contact" aria-label="Contact">
+        <span>contact</span>
+        <a data-instagram-link href="https://www.instagram.com/oaht.n/" target="_blank" rel="noreferrer" aria-label="Contact Nancy Nguyen on Instagram">↗</a>
+      </section>
     </div>
   </main>
 
