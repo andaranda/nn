@@ -3,68 +3,45 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Selected paintings and exhibition history of Nancy Nguyen.">
+  <meta name="description" content="Paintings by Nancy Nguyen.">
   <meta name="theme-color" content="#ffffff">
   <title>Nancy Nguyen</title>
   <link rel="stylesheet" href="assets/css/style.css">
   <script src="assets/js/site.js" defer></script>
 </head>
-<body class="single-page">
+<body class="prayer-wheel">
   <header class="site-header">
-    <a class="site-name" href="#top" aria-label="Nancy Nguyen, top of page">Nancy Nguyen</a>
-    <div class="header-actions">
-      <button class="menu-toggle" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="site-menu"><span></span><span></span></button>
-      <nav id="site-menu" class="site-menu" aria-label="Main navigation" hidden>
-        <a href="#works">Works</a>
-        <a href="#exhibitions">Exhibitions</a>
-        <a data-instagram-link href="https://www.instagram.com/oaht.n/" target="_blank" rel="noreferrer">Instagram ↗</a>
-      </nav>
-    </div>
+    <a class="site-name" href="#top" aria-label="Nancy Nguyen, return to beginning">Nancy Nguyen</a>
   </header>
 
   <main>
-    <section id="top" class="hero" aria-label="Featured painting">
+    <section id="top" class="hero" aria-label="Enter">
       <div id="home-artwork" class="hero-artwork">
         <p class="empty-state">Choose a featured painting in <code>data/site-config.json</code>.</p>
       </div>
-      <a class="hero-scroll" href="#works" aria-label="Scroll to selected works"><span></span></a>
+      <a class="hero-scroll" href="#wheel-start" aria-label="Continue"><span></span></a>
     </section>
 
     <div class="mantra-transition" aria-hidden="true"><span>oṃ tāre tuttāre ture svāhā</span></div>
 
-    <section id="works" class="works-section" aria-labelledby="works-heading">
-      <h1 id="works-heading" class="visually-hidden">Selected works</h1>
-      <div id="works-grid" class="works-grid" aria-live="polite">
-        <p class="empty-state">Artwork records will appear here when added to <code>data/artworks.json</code>.</p>
-      </div>
+    <div id="wheel-track" class="wheel-track" aria-label="Paintings">
+      <section id="wheel-start" class="wheel-card wheel-loading" aria-label="Paintings">
+        <p class="empty-state">Paintings will appear here when added to <code>data/artworks.json</code>.</p>
+      </section>
+    </div>
+
+    <section id="contact" class="contact-card" aria-label="Contact">
+      <span>contact</span>
+      <a data-instagram-link href="https://www.instagram.com/oaht.n/" target="_blank" rel="noreferrer" aria-label="Contact Nancy Nguyen on Instagram">↗</a>
     </section>
 
-    <section id="exhibitions" class="context-section" aria-labelledby="exhibitions-heading">
-      <div class="context-heading">
-        <h2 id="exhibitions-heading">Exhibitions</h2>
+    <section id="return-loop" class="return-loop" aria-label="Return">
+      <div class="return-circle" aria-hidden="true">
+        <img id="return-image" alt="">
       </div>
-      <div class="exhibition-columns">
-        <section aria-labelledby="solo-heading">
-          <h3 id="solo-heading">Solo</h3>
-          <ol id="solo-exhibitions" class="exhibition-list"></ol>
-        </section>
-        <section aria-labelledby="group-heading">
-          <h3 id="group-heading">Group</h3>
-          <ol id="group-exhibitions" class="exhibition-list"></ol>
-        </section>
-      </div>
-      <div class="education">
-        <h3>Education</h3>
-        <p>BFA, San Jose State University</p>
-      </div>
+      <span class="return-mantra" aria-hidden="true">oṃ tāre tuttāre ture svāhā</span>
     </section>
   </main>
-
-  <footer class="site-footer">
-    <div class="footer-mantra" aria-hidden="true"><span>oṃ tāre tuttāre ture svāhā</span></div>
-    <a class="footer-name" href="#top">Nancy Nguyen</a>
-    <a data-instagram-link href="https://www.instagram.com/oaht.n/" target="_blank" rel="noreferrer">Instagram ↗</a>
-  </footer>
 
   <dialog id="artwork-dialog" class="artwork-dialog" aria-label="Artwork details">
     <button class="dialog-close" type="button" aria-label="Close artwork details">Close <span aria-hidden="true">×</span></button>
