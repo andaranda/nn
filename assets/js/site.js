@@ -172,7 +172,6 @@ function setupMantraTransition() {
     const boundaries = [
       hero.offsetTop + hero.offsetHeight,
       ...Array.from(track.children).map(card => card.offsetTop),
-      contact.offsetTop,
       loopStart.offsetTop,
       contact.offsetTop,
       loopEnd.offsetTop
