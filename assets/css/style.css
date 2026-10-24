@@ -58,18 +58,16 @@ button { color: inherit; font: inherit; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 7px;
-  min-width: 62px;
-  min-height: 44px;
+  width: 44px;
+  height: 44px;
   color: #777;
   touch-action: manipulation;
 }
-.instagram-header-link svg { display: block; width: 35px; height: 35px; }
-.instagram-header-link span { font-size: 22px; line-height: 1; }
+.instagram-header-link svg { display: block; width: 23px; height: 23px; }
 .instagram-header-link:hover { color: #333; text-decoration: none; }
 .instagram-header-link:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
 
-.wheel-card {
+.wheel-card, .contact-card {
   position: relative;
   width: 100%;
   height: 100svh;
@@ -78,7 +76,7 @@ button { color: inherit; font: inherit; }
 }
 
 .mantra-transition {
-  position: fixed;
+  position: absolute;
   left: 50%;
   top: 50%;
   display: flex;
@@ -94,8 +92,8 @@ button { color: inherit; font: inherit; }
 .mantra-transition.is-active { opacity: .9; }
 .mantra-transition span, .return-mantra {
   color: #555;
-  font-size: clamp(15px, 1.45vw, 19px);
-  letter-spacing: .09em;
+  font-size: 13px;
+  letter-spacing: .12em;
   font-weight: 300;
   text-shadow: 0 1px 3px rgb(255 255 255 / .95), 0 0 15px rgb(255 255 255 / .8);
 }
@@ -110,17 +108,87 @@ button { color: inherit; font: inherit; }
   overflow: hidden;
   background: #fff;
 }
-#wheel-track .wheel-card {
+#wheel-track .wheel-card,
+#wheel-track .contact-card {
   height: 100%;
   min-height: 0;
 }
 #wheel-track .wheel-card { background: #fff; }
+#wheel-track .contact-card { background: #fff; }
 #wheel-track.carousel-fallback {
   height: auto;
   overflow: visible;
 }
 #wheel-track.carousel-fallback .wheel-card,
-#wheel-track.carousel-fallback .artwork-dialog {
+#wheel-track.carousel-fallback .contact-card {
+  height: 100svh;
+  min-height: 460px;
+}
+.wheel-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: #fff;
+}
+.wheel-artwork {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  background: #fff;
+  cursor: zoom-in;
+}
+.wheel-artwork img {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  object-fit: fill;
+  transform: translate(-50%, -50%) translate(calc(-1 * var(--pan-x, 0px)), calc(-1 * var(--pan-y, 0px)));
+  transition: opacity .2s linear;
+}
+.wheel-artwork:focus-visible { outline: 1px solid currentColor; outline-offset: -5px; }
+.wheel-artwork:hover img { opacity: .97; }
+.wheel-loading { align-items: center; justify-content: center; }
+
+.contact-card {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: #fff;
+  font-size: .85rem;
+  letter-spacing: .025em;
+}
+.contact-card a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  color: #777;
+  touch-action: manipulation;
+  font-size: 1rem;
+}
+.contact-card .instagram-link svg {
+  display: block;
+  width: 23px;
+  height: 23px;
+}
+.contact-card a:hover { color: #333; text-decoration: none; }
+.contact-card a:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
+
+
+.artwork-dialog {
   width: min(94vw, 1380px);
   max-width: none;
   max-height: 94svh;
@@ -170,14 +238,12 @@ button { color: inherit; font: inherit; }
 @media (max-width: 600px) {
   :root { --page-margin: 14px; }
   .site-header { min-height: 60px; padding-top: 14px; padding-bottom: 14px; }
-  .mantra-transition span { font-size: clamp(13px, 4vw, 16px); letter-spacing: .065em; }
-  .instagram-header-link { gap: 5px; min-width: 58px; }
-  .instagram-header-link svg { width: 35px; height: 35px; }
-  .instagram-header-link span { font-size: 21px; }
-  .wheel-card { min-height: 440px; }
+  .mantra-transition span { font-size: 12px; letter-spacing: .08em; }
+  .wheel-card, .contact-card { min-height: 440px; }
   #wheel-track { min-height: 440px; }
-  #wheel-track .wheel-card { min-height: 0; }
+  #wheel-track .wheel-card, #wheel-track .contact-card { min-height: 0; }
   #wheel-track.carousel-fallback .wheel-card,
+  #wheel-track.carousel-fallback .contact-card { min-height: 440px; }
   .wheel-card { padding: 22px 14px; }
   .artwork-dialog { padding: 12px; }
   .dialog-close { display: none; }
