@@ -206,12 +206,12 @@ function setupLoop() {
     if (!entry.isIntersecting || entry.intersectionRatio < 0.6 ||
         !scrollingDown || resetting) return;
 
-    const firstWork = document.querySelector("#wheel-start");
-    if (!firstWork) return;
+    const landing = document.querySelector("#top");
+    if (!landing) return;
     resetting = true;
     window.clearTimeout(resetTimer);
     resetTimer = window.setTimeout(() => {
-      firstWork.scrollIntoView({ behavior: "auto", block: "start" });
+      landing.scrollIntoView({ behavior: "auto", block: "start" });
       window.setTimeout(() => {
         lastScrollY = window.scrollY;
         resetting = false;
