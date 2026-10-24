@@ -79,8 +79,7 @@ function openArtworkDialog(work) {
 
 async function renderHomeAndWheel() {
   const track = document.querySelector("#wheel-track");
-  const contact = document.querySelector("#contact");
-  if (!track || !contact) return;
+  if (!track) return;
 
   try {
     const { artworks, config } = await loadSiteData();
@@ -116,8 +115,6 @@ async function renderHomeAndWheel() {
       track.appendChild(section);
     });
 
-    contact.dataset.anchor = "contact";
-    track.appendChild(contact);
     setupCarousel(track);
   } catch (error) {
     track.innerHTML = '<section class="wheel-card wheel-loading"><p class="empty-state">Artwork data could not be loaded. Check <code>data/artworks.json</code> and preview through a local server.</p></section>';
