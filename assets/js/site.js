@@ -154,8 +154,9 @@ function setupMantraTransition() {
   const hero = document.querySelector(".hero");
   const track = document.querySelector("#wheel-track");
   const contact = document.querySelector("#contact");
-  const returnLoop = document.querySelector("#return-loop");
-  if (!hero || !track || !contact || !returnLoop) return;
+  const loopStart = document.querySelector("#loop-start");
+  const loopEnd = document.querySelector("#loop-end");
+  if (!hero || !track || !contact || !loopStart || !loopEnd) return;
 
   let hideTimer;
   const root = document.documentElement;
@@ -172,7 +173,9 @@ function setupMantraTransition() {
       hero.offsetTop + hero.offsetHeight,
       ...Array.from(track.children).map(card => card.offsetTop),
       contact.offsetTop,
-      returnLoop.offsetTop
+      loopStart.offsetTop,
+      contact.offsetTop,
+      loopEnd.offsetTop
     ];
     const nearBoundary = boundaries.some(boundary =>
       Math.abs(scrollY - boundary) < viewport * 0.34
@@ -188,13 +191,13 @@ function setupMantraTransition() {
 }
 
 function setupLoop() {
-  const returnLoop = document.querySelector("#return-loop");
-  if (!returnLoop) return;
+  const loopEnd = document.querySelector("#loop-end");
+  const loopStart = document.querySelector("#loop-start");
+  if (!loopEnd || !loopStart) return;
 
   let lastScrollY = window.scrollY;
   let scrollingDown = true;
   let resetting = false;
-  let resetTimer;
 
   window.addEventListener("scroll", () => {
     scrollingDown = window.scrollY > lastScrollY;
@@ -206,27 +209,23 @@ function setupLoop() {
     if (!entry.isIntersecting || entry.intersectionRatio < 0.6 ||
         !scrollingDown || resetting) return;
 
-    const landing = document.querySelector("#top");
-    if (!landing) return;
     resetting = true;
-    window.clearTimeout(resetTimer);
-    resetTimer = window.setTimeout(() => {
-      // Disable CSS smooth scrolling for the loop reset. The black return
-      // screen acts as a visual veil, so the jump itself should not be seen.
-      const root = document.documentElement;
-      const previousBehavior = root.style.scrollBehavior;
-      root.style.scrollBehavior = "auto";
-      window.scrollTo(0, 0);
-      requestAnimationFrame(() => {
-        root.style.scrollBehavior = previousBehavior;
-        lastScrollY = window.scrollY;
-        scrollingDown = false;
-        resetting = false;
-      });
-    }, 500);
+    // Both gates have the same appearance. Move from the trailing gate to
+    // the matching gate before the paintings, so the next scroll reveals
+    // painting one rather than the landing screen.
+    const root = document.documentElement;
+    const previousBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
+    window.scrollTo(0, loopStart.offsetTop);
+    requestAnimationFrame(() => {
+      root.style.scrollBehavior = previousBehavior;
+      lastScrollY = window.scrollY;
+      scrollingDown = false;
+      resetting = false;
+    });
   }, { threshold: [0.6, 0.8] });
 
-  observer.observe(returnLoop);
+  observer.observe(loopEnd);
 }
 
 function setupHeader() {
