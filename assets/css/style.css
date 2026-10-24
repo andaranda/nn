@@ -132,8 +132,8 @@ button { color: inherit; font: inherit; }
   height: 100%;
   object-fit: cover;
   object-position: var(--crop-x, 50%) var(--crop-y, 50%);
-  transform: scale(1.12);
-  transition: object-position .65s cubic-bezier(.2,.65,.25,1), opacity .2s linear;
+  transform: scale(1.8);
+  transition: opacity .2s linear;
 }
 .wheel-artwork:focus-visible { outline: 1px solid currentColor; outline-offset: -5px; }
 .wheel-artwork:hover img { opacity: .97; }
