@@ -211,11 +211,18 @@ function setupLoop() {
     resetting = true;
     window.clearTimeout(resetTimer);
     resetTimer = window.setTimeout(() => {
-      landing.scrollIntoView({ behavior: "auto", block: "start" });
-      window.setTimeout(() => {
+      // Disable CSS smooth scrolling for the loop reset. The black return
+      // screen acts as a visual veil, so the jump itself should not be seen.
+      const root = document.documentElement;
+      const previousBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = "auto";
+      window.scrollTo(0, 0);
+      requestAnimationFrame(() => {
+        root.style.scrollBehavior = previousBehavior;
         lastScrollY = window.scrollY;
+        scrollingDown = false;
         resetting = false;
-      }, 450);
+      });
     }, 500);
   }, { threshold: [0.6, 0.8] });
 
