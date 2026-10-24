@@ -45,11 +45,12 @@ button { color: inherit; font: inherit; }
 }
 .site-name {
   pointer-events: auto;
+  color: #303030;
   font-size: .95rem;
   font-weight: 400;
   letter-spacing: .015em;
   white-space: nowrap;
-  text-shadow: 0 1px 12px rgb(255 255 255 / .7);
+  text-shadow: 0 1px 3px rgb(255 255 255 / .95), 0 0 15px rgb(255 255 255 / .8);
 }
 .site-name:focus-visible { outline: 1px solid currentColor; outline-offset: 4px; }
 
@@ -62,13 +63,17 @@ button { color: inherit; font: inherit; }
 }
 
 .mantra-transition {
-  position: static;
+  position: absolute;
+  left: 50%;
+  top: 50%;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
-  margin-left: clamp(18px, 3vw, 44px);
+  justify-content: center;
+  margin: 0;
+  transform: translate(-50%, -50%);
   pointer-events: none;
   opacity: 0;
+  white-space: nowrap;
   transition: opacity .2s linear;
 }
 .mantra-transition.is-active { opacity: .78; }
@@ -157,6 +162,12 @@ button { color: inherit; font: inherit; }
   color: #777;
   font-size: 1rem;
 }
+.contact-card .instagram-link svg {
+  display: block;
+  width: 19px;
+  height: 19px;
+}
+.contact-card a:hover { color: #333; text-decoration: none; }
 .contact-card a:focus-visible { outline: 1px solid currentColor; outline-offset: 2px; }
 
 
@@ -210,7 +221,6 @@ button { color: inherit; font: inherit; }
 @media (max-width: 600px) {
   :root { --page-margin: 14px; }
   .site-header { min-height: 60px; padding-top: 14px; padding-bottom: 14px; }
-  .mantra-transition { margin-left: 14px; }
   .mantra-transition span { font-size: 9px; letter-spacing: .08em; }
   .wheel-card, .contact-card { min-height: 440px; }
   #wheel-track { min-height: 440px; }
