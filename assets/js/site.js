@@ -138,16 +138,17 @@ function setupCarousel(track) {
   let wheelGestureActive = false;
   let isAnimating = false;
 
+  const artworkSlides = [...track.querySelectorAll(".wheel-card")];
   const chooseCrop = image => {
-    const randomPosition = () => Math.round(8 + Math.random() * 84);
+    const randomPosition = () => Math.round(5 + Math.random() * 90);
     const previousX = Number(image.dataset.cropX || 50);
     const previousY = Number(image.dataset.cropY || 50);
     let x = randomPosition();
     let y = randomPosition();
 
-    // Avoid a nearly identical crop on consecutive visits to this artwork.
-    if (Math.abs(x - previousX) < 18) x = x < 50 ? Math.min(92, x + 24) : Math.max(8, x - 24);
-    if (Math.abs(y - previousY) < 18) y = y < 50 ? Math.min(92, y + 24) : Math.max(8, y - 24);
+    // Ensure a visibly different fragment on each revisit.
+    if (Math.abs(x - previousX) < 25) x = x < 50 ? Math.min(95, x + 32) : Math.max(5, x - 32);
+    if (Math.abs(y - previousY) < 25) y = y < 50 ? Math.min(95, y + 32) : Math.max(5, y - 32);
 
     image.dataset.cropX = String(x);
     image.dataset.cropY = String(y);
@@ -156,14 +157,17 @@ function setupCarousel(track) {
   };
 
   const randomizeArtworkAt = index => {
-    const slides = [...track.querySelectorAll(".wheel-card")];
-    const slide = slides[index];
-    const image = slide && slide.querySelector(".wheel-artwork img");
+    if (!artworkSlides.length) return;
+    const wrappedIndex = (index % artworkSlides.length + artworkSlides.length) % artworkSlides.length;
+    const image = artworkSlides[wrappedIndex].querySelector(".wheel-artwork img");
     if (image) chooseCrop(image);
   };
 
-  // Give the first painting a crop immediately, before the visitor moves.
-  randomizeArtworkAt(0);
+  // Assign initial crops before the first slide is shown.
+  artworkSlides.forEach(slide => {
+    const image = slide.querySelector(".wheel-artwork img");
+    if (image) chooseCrop(image);
+  });
 
   const pages = new window.Pageable("#wheel-track", {
     orientation: "vertical",
@@ -195,32 +199,32 @@ function setupCarousel(track) {
     }
   });
 
-  // Pageable reports the current page index after each completed transition.
-  // A new random crop is chosen only for the artwork that has just arrived.
+  // When a slide finishes entering, pre-randomize its neighbors rather than
+  // moving the visible image. Their crops are already set when they arrive.
   pages.on("scroll.end", data => {
-    randomizeArtworkAt(data.index);
+    randomizeArtworkAt(data.index - 1);
+    randomizeArtworkAt(data.index + 1);
   });
 
-  // One wheel/trackpad gesture advances at most one slide. Inertial wheel
-  // events are swallowed until the gesture has gone quiet.
+  // A trackpad gesture can emit momentum events for much longer than a mouse
+  // wheel. Keep the gesture locked until 800ms after the final wheel event.
   track.addEventListener("wheel", event => {
     event.preventDefault();
-
-    // Ignore input during the actual slide animation without treating it as
-    // a consumed gesture. Once the animation ends, a fresh wheel movement
-    // can advance again instead of requiring the visitor to wait motionless.
-    if (isAnimating) return;
-
-    if (!wheelGestureActive) {
-      wheelGestureActive = true;
-      if (event.deltaY > 0) pages.next();
-      else if (event.deltaY < 0) pages.prev();
-    }
 
     window.clearTimeout(wheelQuietTimer);
     wheelQuietTimer = window.setTimeout(() => {
       wheelGestureActive = false;
-    }, 260);
+    }, 800);
+
+    if (wheelGestureActive) return;
+    wheelGestureActive = true;
+
+    // If a new gesture begins during a slide transition, swallow it and its
+    // momentum. The quiet timer above will release the lock after it ends.
+    if (isAnimating) return;
+
+    if (event.deltaY > 0) pages.next();
+    else if (event.deltaY < 0) pages.prev();
   }, { passive: false });
 }
 
