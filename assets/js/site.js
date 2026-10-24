@@ -108,7 +108,8 @@ async function renderHomeAndWheel() {
       const img = document.createElement("img");
       img.src = resolveImagePath(work.image);
       img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
-      img.loading = index < 2 ? "eager" : "lazy";
+      img.loading = index < 3 ? "eager" : "lazy";
+      img.decoding = "async";
       button.appendChild(img);
       button.addEventListener("click", () => openArtworkDialog(work));
       section.appendChild(button);
@@ -286,6 +287,14 @@ function setupCarousel(track) {
     primeArtworkAt(currentIndex + 1);
   });
 
+  // Preload both neighboring paintings at startup, and before touch navigation.
+  primeArtworkAt(currentIndex - 1);
+  primeArtworkAt(currentIndex + 1);
+  track.addEventListener("touchstart", () => {
+    primeArtworkAt(currentIndex - 1);
+    primeArtworkAt(currentIndex + 1);
+  }, { passive: true });
+
   // Accept one wheel event per gesture. Momentum events are ignored without
   // extending the lock, including events received during the mantra transition.
   track.addEventListener("wheel", event => {
@@ -311,6 +320,20 @@ function setupDialog() {
   });
 }
 
+function setupScrollCue() {
+  const cue = document.querySelector(".scroll-cue");
+  if (!cue) return;
+  const hide = () => {
+    cue.classList.add("is-hidden");
+    window.removeEventListener("wheel", hide);
+    window.removeEventListener("touchstart", hide);
+    window.removeEventListener("keydown", hide);
+  };
+  window.addEventListener("wheel", hide, { once: true, passive: true });
+  window.addEventListener("touchstart", hide, { once: true, passive: true });
+  window.addEventListener("keydown", hide, { once: true });
+}
+
 function setupHeader() {
   const header = document.querySelector(".site-header");
   if (!header) return;
@@ -324,4 +347,5 @@ document.addEventListener("DOMContentLoaded", () => {
   renderHomeAndWheel();
   setupDialog();
   setupHeader();
+  setupScrollCue();
 });
