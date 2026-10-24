@@ -6,8 +6,8 @@
   <meta name="description" content="Paintings by Nancy Nguyen.">
   <meta name="theme-color" content="#ffffff">
   <title>Nancy Nguyen</title>
-  <link rel="stylesheet" href="assets/css/style.css?v=loop-4">
-  <script src="assets/js/site.js?v=loop-4" defer></script>
+  <link rel="stylesheet" href="assets/css/style.css?v=loop-5">
+  <script src="assets/js/site.js?v=loop-5" defer></script>
 </head>
 <body class="prayer-wheel">
   <header class="site-header">
@@ -22,7 +22,7 @@
       <a class="hero-scroll" href="#wheel-start" aria-label="Continue"><span></span></a>
     </section>
 
-    <div class="mantra-transition" aria-hidden="true"><span>oṃ tāre tuttāre ture svāhā</span></div>
+    <div id="loop-start" class="loop-mantra" aria-label="Mantra"><span>oṃ tāre tuttāre ture svāhā</span></div>
 
     <div id="wheel-track" class="wheel-track" aria-label="Paintings">
       <section id="wheel-start" class="wheel-card wheel-loading" aria-label="Paintings">
@@ -35,12 +35,7 @@
       <a data-instagram-link href="https://www.instagram.com/oaht.n/" target="_blank" rel="noreferrer" aria-label="Contact Nancy Nguyen on Instagram">↗</a>
     </section>
 
-    <section id="return-loop" class="return-loop" aria-label="Return">
-      <div class="return-circle" aria-hidden="true">
-        <img id="return-image" alt="">
-      </div>
-      <span class="return-mantra" aria-hidden="true">oṃ tāre tuttāre ture svāhā</span>
-    </section>
+    <div id="loop-end" class="loop-mantra" aria-label="Mantra"><span>oṃ tāre tuttāre ture svāhā</span></div>
   </main>
 
   <dialog id="artwork-dialog" class="artwork-dialog" aria-label="Artwork details">
