@@ -139,6 +139,7 @@ function setupCarousel(track) {
   let isAnimating = false;
 
   const artworkSlides = [...track.querySelectorAll(".wheel-card")];
+  let currentIndex = 0;
   const chooseCrop = image => {
     const previousX = Number(image.dataset.cropX ?? 0.5);
     const previousY = Number(image.dataset.cropY ?? 0.5);
@@ -241,11 +242,22 @@ function setupCarousel(track) {
     }
   });
 
-  // When a slide finishes entering, pre-randomize its neighbors rather than
-  // moving the visible image. Their crops are already set when they arrive.
+  const primeArtworkAt = index => {
+    if (!artworkSlides.length) return;
+    const wrappedIndex = (index % artworkSlides.length + artworkSlides.length) % artworkSlides.length;
+    const image = artworkSlides[wrappedIndex].querySelector(".wheel-artwork img");
+    if (!image) return;
+    image.loading = "eager";
+    if (image.complete && image.decode) image.decode().catch(() => {});
+  };
+
+  // Prepare neighboring paintings before they enter the viewport.
   pages.on("scroll.end", data => {
-    randomizeArtworkAt(data.index - 1);
-    randomizeArtworkAt(data.index + 1);
+    currentIndex = data.index % artworkSlides.length;
+    randomizeArtworkAt(currentIndex - 1);
+    randomizeArtworkAt(currentIndex + 1);
+    primeArtworkAt(currentIndex - 1);
+    primeArtworkAt(currentIndex + 1);
   });
 
   // Accept one wheel event per gesture. Momentum events are ignored without
@@ -256,7 +268,9 @@ function setupCarousel(track) {
     if (event.deltaY === 0) return;
 
     wheelGestureActive = true;
-    if (event.deltaY > 0) pages.next();
+    const direction = event.deltaY > 0 ? 1 : -1;
+    primeArtworkAt(currentIndex + direction);
+    if (direction > 0) pages.next();
     else pages.prev();
   }, { passive: false });
 }
