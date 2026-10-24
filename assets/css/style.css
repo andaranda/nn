@@ -62,24 +62,20 @@ button { color: inherit; font: inherit; }
 }
 
 .mantra-transition {
-  position: fixed;
-  z-index: 18;
-  inset: 68px 0 auto;
-  min-height: 34px;
+  position: static;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
+  margin-left: clamp(18px, 3vw, 44px);
   pointer-events: none;
   opacity: 0;
-  background: rgb(255 255 255 / .88);
-  border-bottom: 1px solid rgb(232 232 232 / .65);
   transition: opacity .2s linear;
 }
-.mantra-transition.is-active { opacity: .24; }
+.mantra-transition.is-active { opacity: .78; }
 .mantra-transition span, .return-mantra {
-  color: #666;
-  font-size: 10px;
-  letter-spacing: .14em;
+  color: #555;
+  font-size: 11px;
+  letter-spacing: .12em;
   font-weight: 300;
 }
 
@@ -210,7 +206,8 @@ button { color: inherit; font: inherit; }
 @media (max-width: 600px) {
   :root { --page-margin: 14px; }
   .site-header { min-height: 60px; padding-top: 14px; padding-bottom: 14px; }
-  .mantra-transition { top: 60px; }
+  .mantra-transition { margin-left: 14px; }
+  .mantra-transition span { font-size: 9px; letter-spacing: .08em; }
   .wheel-card, .contact-card { min-height: 440px; }
   #wheel-track { min-height: 440px; }
   #wheel-track .wheel-card, #wheel-track .contact-card { min-height: 0; }
