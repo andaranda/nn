@@ -1,6 +1,5 @@
 const DATA = {
   artworks: "data/artworks.json",
-  exhibitions: "data/exhibitions.json",
   config: "data/site-config.json"
 };
 
@@ -23,6 +22,14 @@ function resolveImagePath(path) {
 
 function safeExternalLink(url) {
   return /^https?:\/\//i.test(url || "");
+}
+
+async function loadSiteData() {
+  const [artworks, config] = await Promise.all([
+    readJson(DATA.artworks),
+    readJson(DATA.config)
+  ]);
+  return { artworks: artworks.filter(work => work.image), config };
 }
 
 async function renderInstagramLinks() {
@@ -70,140 +77,67 @@ function openArtworkDialog(work) {
   dialog.showModal();
 }
 
-async function renderHome() {
-  const container = document.querySelector("#home-artwork");
-  if (!container) return;
-  try {
-    const [artworks, config] = await Promise.all([
-      readJson(DATA.artworks),
-      readJson(DATA.config)
-    ]);
-    const featured = artworks.find(work => work.id === config.homepageArtworkId && work.image);
-    if (!featured) {
-      container.innerHTML = '<p class="empty-state">Choose a homepage painting in <code>data/site-config.json</code> and add its image path to <code>data/artworks.json</code>.</p>';
-      return;
-    }
+async function renderHomeAndWheel() {
+  const hero = document.querySelector("#home-artwork");
+  const track = document.querySelector("#wheel-track");
+  if (!hero || !track) return;
 
-    container.innerHTML = "";
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "hero-open";
-    button.setAttribute("aria-label", "View details for " + text(featured.title || "featured painting"));
-    const img = document.createElement("img");
-    img.src = resolveImagePath(featured.image);
-    img.alt = text(featured.alt || featured.title || "Painting by Nancy Nguyen");
-    img.fetchPriority = "high";
-    button.appendChild(img);
-    button.addEventListener("click", () => openArtworkDialog(featured));
-    container.appendChild(button);
-  } catch (error) {
-    container.innerHTML = '<p class="empty-state">Artwork data could not be loaded. Preview the site through a local server, not by opening the HTML file directly.</p>';
-  }
-}
-
-async function renderWorks() {
-  const grid = document.querySelector("#works-grid");
-  if (!grid) return;
   try {
-    const [artworks, config] = await Promise.all([
-      readJson(DATA.artworks),
-      readJson(DATA.config)
-    ]);
-    let works = artworks.filter(work => work.image);
+    const { artworks, config } = await loadSiteData();
+    const featured = artworks.find(work => work.id === config.homepageArtworkId) || artworks[0];
+    if (!featured) throw new Error("No artwork records with images were found.");
+
+    hero.innerHTML = "";
+    const heroButton = document.createElement("button");
+    heroButton.type = "button";
+    heroButton.className = "hero-open";
+    heroButton.setAttribute("aria-label", "View details for " + text(featured.title || "featured painting"));
+    const heroImage = document.createElement("img");
+    heroImage.src = resolveImagePath(featured.image);
+    heroImage.alt = text(featured.alt || featured.title || "Painting by Nancy Nguyen");
+    heroImage.fetchPriority = "high";
+    heroButton.appendChild(heroImage);
+    heroButton.addEventListener("click", () => openArtworkDialog(featured));
+    hero.appendChild(heroButton);
+
+    let works = artworks.slice();
     if (Array.isArray(config.curatedArtworkIds) && config.curatedArtworkIds.length) {
       const order = new Map(config.curatedArtworkIds.map((id, index) => [id, index]));
       works = works.filter(work => order.has(work.id))
         .sort((a, b) => order.get(a.id) - order.get(b.id));
     }
-    if (!works.length) return;
+    if (!works.length) works = [featured];
 
-    grid.innerHTML = "";
-    works.forEach(work => {
+    track.innerHTML = "";
+    works.forEach((work, index) => {
+      const section = document.createElement("section");
+      section.className = "wheel-card";
+      section.setAttribute("aria-label", "Painting " + (index + 1));
+      if (index === 0) section.id = "wheel-start";
+
       const button = document.createElement("button");
       button.type = "button";
-      button.className = "work-card";
-      button.setAttribute("aria-label", "View " + text(work.title || "artwork"));
+      button.className = "wheel-artwork";
+      button.setAttribute("aria-label", "View " + text(work.title || "painting"));
       const img = document.createElement("img");
       img.src = resolveImagePath(work.image);
       img.alt = text(work.alt || work.title || "Painting by Nancy Nguyen");
-      img.loading = "lazy";
+      img.loading = index < 2 ? "eager" : "lazy";
       button.appendChild(img);
       button.addEventListener("click", () => openArtworkDialog(work));
-      grid.appendChild(button);
+      section.appendChild(button);
+      track.appendChild(section);
     });
+
+    const returnImage = document.querySelector("#return-image");
+    if (returnImage) {
+      returnImage.src = resolveImagePath(featured.image);
+      returnImage.alt = "";
+    }
   } catch (error) {
-    grid.innerHTML = '<p class="empty-state">Artwork data could not be loaded. Preview the site through a local server, not by opening the HTML file directly.</p>';
+    hero.innerHTML = '<p class="empty-state">Artwork data could not be loaded. Preview through a local server, not by opening the HTML file directly.</p>';
+    track.innerHTML = '<section class="wheel-card wheel-loading"><p class="empty-state">Check the records in <code>data/artworks.json</code>.</p></section>';
   }
-}
-
-function renderExhibitionList(containerId, exhibitions) {
-  const list = document.getElementById(containerId);
-  if (!list) return;
-  list.innerHTML = "";
-  exhibitions
-    .slice()
-    .sort((a, b) => Number(b.year) - Number(a.year) || text(a.title).localeCompare(text(b.title)))
-    .forEach(exhibition => {
-      const li = document.createElement("li");
-      const year = document.createElement("span");
-      year.className = "exhibition-year";
-      year.textContent = text(exhibition.year);
-      li.appendChild(year);
-
-      const detail = document.createElement("span");
-      if (exhibition.url && safeExternalLink(exhibition.url)) {
-        const link = document.createElement("a");
-        link.href = exhibition.url;
-        link.target = "_blank";
-        link.rel = "noreferrer";
-        link.textContent = text(exhibition.title);
-        detail.appendChild(link);
-      } else {
-        detail.appendChild(document.createTextNode(text(exhibition.title)));
-      }
-      const venue = [exhibition.venue, exhibition.location].filter(Boolean).join(", ");
-      if (venue) {
-        detail.appendChild(document.createTextNode(", "));
-        const location = document.createElement("span");
-        location.className = "exhibition-location";
-        location.textContent = venue;
-        detail.appendChild(location);
-      }
-      li.appendChild(detail);
-      list.appendChild(li);
-    });
-}
-
-async function renderExhibitions() {
-  if (!document.querySelector("#solo-exhibitions")) return;
-  try {
-    const exhibitions = await readJson(DATA.exhibitions);
-    renderExhibitionList("solo-exhibitions", exhibitions.filter(item => item.type === "solo"));
-    renderExhibitionList("group-exhibitions", exhibitions.filter(item => item.type === "group"));
-  } catch (error) {
-    const section = document.querySelector("#exhibitions");
-    if (section) section.insertAdjacentHTML("afterbegin", '<p class="empty-state">Exhibition data could not be loaded. Preview the site through a local server.</p>');
-  }
-}
-
-function setupMenu() {
-  const toggle = document.querySelector(".menu-toggle");
-  const menu = document.querySelector("#site-menu");
-  if (!toggle || !menu) return;
-
-  toggle.addEventListener("click", () => {
-    const isOpen = toggle.getAttribute("aria-expanded") === "true";
-    toggle.setAttribute("aria-expanded", String(!isOpen));
-    toggle.setAttribute("aria-label", isOpen ? "Open navigation" : "Close navigation");
-    menu.hidden = isOpen;
-  });
-  menu.querySelectorAll("a[href^='#']").forEach(link => {
-    link.addEventListener("click", () => {
-      toggle.setAttribute("aria-expanded", "false");
-      toggle.setAttribute("aria-label", "Open navigation");
-      menu.hidden = true;
-    });
-  });
 }
 
 function setupDialog() {
@@ -218,58 +152,76 @@ function setupDialog() {
 
 function setupMantraTransition() {
   const hero = document.querySelector(".hero");
-  const context = document.querySelector("#exhibitions");
-  const footer = document.querySelector(".site-footer");
-  if (!hero || !context || !footer) return;
+  const track = document.querySelector("#wheel-track");
+  const contact = document.querySelector("#contact");
+  const returnLoop = document.querySelector("#return-loop");
+  if (!hero || !track || !contact || !returnLoop) return;
 
   let hideTimer;
   const root = document.documentElement;
   const setOpacity = value => root.style.setProperty("--mantra-opacity", String(value));
-  const setFooterOpacity = value => root.style.setProperty("--footer-mantra-opacity", String(value));
 
   const updateDuringScroll = () => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setOpacity(0);
-      setFooterOpacity(0);
       return;
     }
-
     const scrollY = window.scrollY;
     const viewport = window.innerHeight || 1;
-    const maxScroll = Math.max(0, document.documentElement.scrollHeight - viewport);
     const boundaries = [
       hero.offsetTop + hero.offsetHeight,
-      context.offsetTop,
-      maxScroll
+      ...Array.from(track.children).map(card => card.offsetTop),
+      contact.offsetTop,
+      returnLoop.offsetTop
     ];
     const nearBoundary = boundaries.some(boundary =>
-      Math.abs(scrollY - boundary) < viewport * 0.38
+      Math.abs(scrollY - boundary) < viewport * 0.34
     );
-
-    const atBottom = maxScroll - scrollY < viewport * 0.38;
-    if (atBottom) {
-      setOpacity(0);
-      setFooterOpacity(0.65);
-    } else {
-      setFooterOpacity(0);
-      setOpacity(nearBoundary ? 0.22 : 0);
-    }
-
+    setOpacity(nearBoundary ? 0.24 : 0);
     window.clearTimeout(hideTimer);
-    hideTimer = window.setTimeout(() => {
-      setOpacity(0);
-      setFooterOpacity(0);
-    }, 260);
+    hideTimer = window.setTimeout(() => setOpacity(0), 260);
   };
 
   setOpacity(0);
-  setFooterOpacity(0);
   window.addEventListener("scroll", updateDuringScroll, { passive: true });
-  window.addEventListener("resize", () => {
-    setOpacity(0);
-    setFooterOpacity(0);
-  });
+  window.addEventListener("resize", () => setOpacity(0));
 }
+
+function setupLoop() {
+  const returnLoop = document.querySelector("#return-loop");
+  if (!returnLoop) return;
+
+  let lastScrollY = window.scrollY;
+  let scrollingDown = true;
+  let resetting = false;
+  let resetTimer;
+
+  window.addEventListener("scroll", () => {
+    scrollingDown = window.scrollY > lastScrollY;
+    lastScrollY = window.scrollY;
+  }, { passive: true });
+
+  const observer = new IntersectionObserver(entries => {
+    const entry = entries[0];
+    if (!entry.isIntersecting || entry.intersectionRatio < 0.6 ||
+        !scrollingDown || resetting) return;
+
+    const firstWork = document.querySelector("#wheel-start");
+    if (!firstWork) return;
+    resetting = true;
+    window.clearTimeout(resetTimer);
+    resetTimer = window.setTimeout(() => {
+      firstWork.scrollIntoView({ behavior: "auto", block: "start" });
+      window.setTimeout(() => {
+        lastScrollY = window.scrollY;
+        resetting = false;
+      }, 450);
+    }, 500);
+  }, { threshold: [0.6, 0.8] });
+
+  observer.observe(returnLoop);
+}
+
 function setupHeader() {
   const header = document.querySelector(".site-header");
   if (!header) return;
@@ -280,11 +232,9 @@ function setupHeader() {
 
 document.addEventListener("DOMContentLoaded", () => {
   renderInstagramLinks();
-  renderHome();
-  renderWorks();
-  renderExhibitions();
-  setupMenu();
+  renderHomeAndWheel();
   setupDialog();
   setupHeader();
   setupMantraTransition();
+  setupLoop();
 });
