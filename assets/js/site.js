@@ -227,7 +227,7 @@ function setupCarousel(track) {
     pips: false,
     animation: 700,
     delay: 100,
-    swipeThreshold: 350,
+    swipeThreshold: 80,
     freeScroll: false,
     events: {
       // Wheel input is handled below so a single trackpad/mouse gesture
