@@ -138,28 +138,20 @@ button { color: inherit; font: inherit; }
   background: #fff;
 }
 
-/* A narrow white seam separates the outgoing and incoming paintings
-   only while the carousel is moving; at rest, the artwork fills the viewport. */
-#wheel-track::after {
-  content: "";
-  position: absolute;
-  z-index: 5;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 18px;
-  transform: translateY(-50%);
-  background: #fff;
-  pointer-events: none;
-  opacity: 0;
+/* During movement, inset each painting slightly within its slide.
+   The white slide backgrounds form a real gap between neighboring works.
+   At rest the artwork returns to full-screen. */
+.wheel-artwork {
+  transition: top 120ms ease, height 120ms ease;
 }
 
-#wheel-track.is-transitioning::after {
-  opacity: 1;
+#wheel-track.is-transitioning .wheel-artwork {
+  top: 9px;
+  height: calc(100% - 18px);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  #wheel-track::after { transition: none; }
+  .wheel-artwork { transition: none; }
 }
 #wheel-track .wheel-card,
 #wheel-track .contact-card {
