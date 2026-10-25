@@ -249,12 +249,14 @@ function setupCarousel(track) {
     },
     onStart: () => {
       isAnimating = true;
+      track.classList.add("is-transitioning");
       if (!mantra || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
       window.clearTimeout(mantraTimer);
       mantra.classList.add("is-active");
     },
     onFinish: () => {
       isAnimating = false;
+      track.classList.remove("is-transitioning");
       if (mantra) {
         window.clearTimeout(mantraTimer);
         mantraTimer = window.setTimeout(() => mantra.classList.remove("is-active"), 180);
