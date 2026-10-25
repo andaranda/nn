@@ -138,25 +138,20 @@ button { color: inherit; font: inherit; }
   background: #fff;
 }
 
-/* A brief white edge fade helps the eye distinguish one painting from the next
-   without introducing a permanent gap between works. */
+/* A narrow white seam separates the outgoing and incoming paintings
+   only while the carousel is moving; at rest, the artwork fills the viewport. */
 #wheel-track::after {
   content: "";
   position: absolute;
   z-index: 5;
-  inset: 0;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 18px;
+  transform: translateY(-50%);
+  background: #fff;
   pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    #fff 0%,
-    rgb(255 255 255 / .82) 3%,
-    rgb(255 255 255 / 0) 19%,
-    rgb(255 255 255 / 0) 81%,
-    rgb(255 255 255 / .82) 97%,
-    #fff 100%
-  );
   opacity: 0;
-  transition: opacity 180ms ease-out;
 }
 
 #wheel-track.is-transitioning::after {
