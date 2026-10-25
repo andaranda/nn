@@ -137,6 +137,35 @@ button { color: inherit; font: inherit; }
   overflow: hidden;
   background: #fff;
 }
+
+/* A brief white edge fade helps the eye distinguish one painting from the next
+   without introducing a permanent gap between works. */
+#wheel-track::after {
+  content: "";
+  position: absolute;
+  z-index: 5;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    #fff 0%,
+    rgb(255 255 255 / .82) 3%,
+    rgb(255 255 255 / 0) 19%,
+    rgb(255 255 255 / 0) 81%,
+    rgb(255 255 255 / .82) 97%,
+    #fff 100%
+  );
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+
+#wheel-track.is-transitioning::after {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #wheel-track::after { transition: none; }
+}
 #wheel-track .wheel-card,
 #wheel-track .contact-card {
   height: 100%;
